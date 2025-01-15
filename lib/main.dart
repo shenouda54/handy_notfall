@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/splash_screen.dart';
+import 'package:handy_notfall/screens/splash_screen.dart';
 
 void main(){
   runApp(MyApp());
