@@ -1,11 +1,26 @@
-
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/firebase_function.dart';
 import 'package:handy_notfall/models/customer_model.dart';
-import 'package:handy_notfall/screens/data_of_custmer_screen.dart';
 
 class DataTelponeScreen extends StatefulWidget {
-  const DataTelponeScreen({super.key});
+  final String firstName;
+  final String lastName;
+  final String address;
+  final String postalCode;
+  final String city;
+  final String phoneNumber;
+  final String emailAddress;
+
+  const DataTelponeScreen({
+    Key? key,
+    required this.firstName,
+    required this.lastName,
+    required this.address,
+    required this.postalCode,
+    required this.city,
+    required this.phoneNumber,
+    required this.emailAddress,
+  }) : super(key: key);
 
   @override
   State<DataTelponeScreen> createState() => _DataTelponeScreenState();
@@ -15,7 +30,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController deviceTypesController = TextEditingController();
-  final TextEditingController customerCodeController = TextEditingController();
   final TextEditingController repairPriceController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
@@ -49,6 +63,17 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final List<String> selectedIssues = [];
 
   @override
+  void dispose() {
+    modelController.dispose();
+    deviceTypesController.dispose();
+    repairPriceController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    customIssueController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +89,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
             children: [
               // اختيار نوع الجهاز
               _buildDropdownField(
-                controller: deviceTypesController,
                 label: 'Device Type *',
                 value: selectedDeviceType,
                 items: deviceTypes,
@@ -81,13 +105,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                 controller: modelController,
                 label: 'Device Model *',
               ),
-              const SizedBox(height: 16.0),
-
-              // // كود العميل
-              // _buildInputField(
-              //   controller: customerCodeController,
-              //   label: 'Customer Code *',
-              // ),
               const SizedBox(height: 16.0),
 
               // المشاكل داخل Card
@@ -171,10 +188,11 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                             icon: const Icon(Icons.add),
                             onPressed: () {
                               if (customIssueController.text.isNotEmpty &&
-                                  !selectedIssues.contains(
-                                      customIssueController.text)) {
+                                  !selectedIssues
+                                      .contains(customIssueController.text)) {
                                 setState(() {
-                                  selectedIssues.add(customIssueController.text);
+                                  selectedIssues
+                                      .add(customIssueController.text);
                                   customIssueController.clear();
                                 });
                               }
@@ -213,35 +231,65 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               const SizedBox(height: 20.0),
 
               // زر الحفظ
-              Container(
-                child: Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32.0, vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32.0, vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    onPressed: () {
-                      CustomerModel model= CustomerModel(customerFirstName: firstNameController.text, customerLastName: lastNameController.text, address: addressController.text, postalCode: AutofillHints.postalCode, city: cityController.text, phoneNumber: phoneController.hashCode, emailAddress: emailController.text, deviceType: deviceTypesController.text, deviceModel: modelController.text, issue: customIssueController.text, price: repairPriceController.hashCode, startDate: Duration.millisecondsPerHour , endDate:Duration.millisecondsPerHour );
-                      FirebaseFireStore.addCustomer(model).then((value) {
-                        Navigator.pop(context);
-                      },);
-                      if (_formKey.currentState!.validate() &&
-                          selectedIssues.isNotEmpty) {
+                  ),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate() &&
+                        selectedIssues.isNotEmpty) {
+                      try {
+                        CustomerModel model = CustomerModel(
+                          customerFirstName: widget.firstName.trim(),
+                          customerLastName: widget.lastName.trim(),
+                          address: widget.address.trim(),
+                          postalCode: widget.postalCode.trim(),
+                          city: widget.city.trim(),
+                          phoneNumber: widget.phoneNumber.trim(),
+                          emailAddress: widget.emailAddress.trim(),
+                          deviceType: selectedDeviceType ?? '',
+                          deviceModel: modelController.text.trim(),
+                          issue: selectedIssues.join(', '),
+                          price: int.tryParse(repairPriceController.text.trim()) ??
+                              0,
+                          startDate: DateTime.now().millisecondsSinceEpoch,
+                          endDate: DateTime.now()
+                              .add(const Duration(days: 90))
+                              .millisecondsSinceEpoch,
+                          isDone: false,
+                        );
+
+                        await FirebaseFireStore.addCustomer(model);
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Data Saved Successfully! Issues: ${selectedIssues.join(', ')}'),
-                          ),
+                          const SnackBar(content: Text('Data Saved Successfully!')),
+                        );
+
+                        Navigator.pop(context);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to save data: $e')),
                         );
                       }
-                    },
-                    child: const Text(
-                      'Save Data',
-                      style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold,color: Colors.white),
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Please fill all required fields.')),
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Save Data',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -313,7 +361,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     required String label,
     required String? value,
     required List<String> items,
-    required Function(String?) onChanged, required TextEditingController controller,
+    required Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
       value: value,
