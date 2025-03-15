@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/firebase_options.dart';
+import 'package:handy_notfall/login/login.dart';
+import 'package:handy_notfall/screens/data_of_custmer_screen.dart';
 import 'package:handy_notfall/screens/splash_screen.dart';
 
 void main() async {
@@ -12,7 +14,6 @@ void main() async {
   );
   runApp(MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -20,7 +21,35 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ); // شاشة تحميل أثناء التحقق من حالة المستخدم
+          }
+          if (snapshot.hasData) {
+            return const CustomerScreen(); // المستخدم مسجل دخول
+          }
+          return const LoginScreen(); // المستخدم غير مسجل دخول
+        },
+      ),
     );
   }
 }
+
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: FirebaseAuth.instance.currentUser == null
+//           ? const LoginScreen()
+//           : const CustomerScreen(),
+//     );
+//   }
+// }

@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/firebase_function.dart';
 import 'package:handy_notfall/models/customer_model.dart';
+import 'package:intl/intl.dart';
 
 class DataTelponeScreen extends StatefulWidget {
   final String firstName;
@@ -137,9 +140,9 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         ),
                         items: issueOptions
                             .map((issue) => DropdownMenuItem(
-                          value: issue,
-                          child: Text(issue),
-                        ))
+                                  value: issue,
+                                  child: Text(issue),
+                                ))
                             .toList(),
                         onChanged: (value) {
                           setState(() {
@@ -149,12 +152,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                               selectedIssues.add(value);
                             }
                           });
-                        },
-                        validator: (value) {
-                          if (selectedIssues.isEmpty) {
-                            return 'Please select at least one issue.';
-                          }
-                          return null;
                         },
                       ),
                       const SizedBox(height: 16.0),
@@ -242,45 +239,54 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                     ),
                   ),
                   onPressed: () async {
-                    if (_formKey.currentState!.validate() &&
-                        selectedIssues.isNotEmpty) {
-                      try {
-                        CustomerModel model = CustomerModel(
-                          customerFirstName: widget.firstName.trim(),
-                          customerLastName: widget.lastName.trim(),
-                          address: widget.address.trim(),
-                          postalCode: widget.postalCode.trim(),
-                          city: widget.city.trim(),
-                          phoneNumber: widget.phoneNumber.trim(),
-                          emailAddress: widget.emailAddress.trim(),
-                          deviceType: selectedDeviceType ?? '',
-                          deviceModel: modelController.text.trim(),
-                          issue: selectedIssues.join(', '),
-                          price: int.tryParse(repairPriceController.text.trim()) ??
-                              0,
-                          startDate: DateTime.now().millisecondsSinceEpoch,
-                          endDate: DateTime.now()
-                              .add(const Duration(days: 90))
-                              .millisecondsSinceEpoch,
-                          isDone: false,
-                        );
+                    String? userEmail = FirebaseAuth.instance.currentUser?.email;
+                    if (userEmail == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text(' يجب تسجيل الدخول أولاً!')),
+                      );
+                      return;
+                    }
+                    try {
+                      CustomerModel model = CustomerModel(
+                        customerFirstName: widget.firstName.trim(),
+                        customerLastName: widget.lastName.trim(),
+                        address: widget.address.trim(),
+                        postalCode: widget.postalCode.trim(),
+                        city: widget.city.trim(),
+                        phoneNumber: widget.phoneNumber.trim(),
+                        emailAddress: widget.emailAddress.trim(),
+                        deviceType: selectedDeviceType ?? '',
+                        deviceModel: modelController.text.trim(),
+                        issue: selectedIssues.isNotEmpty
+                            ? selectedIssues.join(', ')
+                            : 'No Issues',
+                        // إذا لم يحدد مشاكل
+                        price:
+                            int.tryParse(repairPriceController.text.trim()) ??
+                                0,
+                        startDate: startDateController.text.isNotEmpty
+                            ? Timestamp.fromDate(DateFormat('yyyy-MM-dd')
+                                .parse(startDateController.text.trim()))
+                            : Timestamp.now(),
+                        endDate: endDateController.text.isNotEmpty
+                            ? Timestamp.fromDate(DateFormat('yyyy-MM-dd')
+                                .parse(endDateController.text.trim()))
+                            : Timestamp.now(),
+                        isDone: false,
+                        userEmail: userEmail, // ✅ احفظ البريد الإلكتروني مع البيانات
+                      );
 
-                        await FirebaseFireStore.addCustomer(model);
+                      await FirebaseFireStore.addCustomer(model);
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Data Saved Successfully!')),
-                        );
-
-                        Navigator.pop(context);
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to save data: $e')),
-                        );
-                      }
-                    } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text('Please fill all required fields.')),
+                            content: Text('Data Saved Successfully!')),
+                      );
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to save data: $e')),
                       );
                     }
                   },
@@ -301,6 +307,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     );
   }
 
+  // TODO NEW CLASS
   // حقل إدخال عام
   Widget _buildInputField({
     required TextEditingController controller,
@@ -314,12 +321,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
         labelText: label,
         border: const OutlineInputBorder(),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $label';
-        }
-        return null;
-      },
     );
   }
 
@@ -347,12 +348,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
           controller.text = pickedDate.toString().split(' ')[0];
         }
       },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select $label';
-        }
-        return null;
-      },
     );
   }
 
@@ -371,17 +366,11 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
       ),
       items: items
           .map((item) => DropdownMenuItem(
-        value: item,
-        child: Text(item),
-      ))
+                value: item,
+                child: Text(item),
+              ))
           .toList(),
       onChanged: onChanged,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select $label';
-        }
-        return null;
-      },
     );
   }
 }

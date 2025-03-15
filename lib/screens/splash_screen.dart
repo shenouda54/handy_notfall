@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
               width: MediaQuery.of(context).size.width * 0.6, // عرض الصورة
             ),
             const SizedBox(height: 20.0),
-            Text(
+            const Text(
               'HandyNotfall',
               style: TextStyle(
                 color: Color(0xFFE53935), // الأحمر للعناوين الكبيرة
