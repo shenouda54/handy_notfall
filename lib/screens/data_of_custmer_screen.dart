@@ -17,7 +17,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
   }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -30,7 +29,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
   @override
   void dispose() {
     firstNameController.dispose();
-    lastNameController.dispose();
     addressController.dispose();
     cityController.dispose();
     phoneController.dispose();
@@ -46,7 +44,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: !isSearching
-            ? const Text('Customer Data')
+            ? const Text('Kunden Daten')
             : TextField(
                 controller: searchController,
                 autofocus: true,
@@ -62,7 +60,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _signOut, // ✅ تسجيل الخروج عند الضغط
+            onPressed: _signOut, //  تسجيل الخروج عند الضغط
           ),
           IconButton(
             icon: const Icon(Icons.search),
@@ -95,21 +93,21 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           child: TextFormField(
                             controller: firstNameController,
                             decoration: const InputDecoration(
-                              labelText: 'First Name *',
+                              labelText: 'Vor- und Nachname *',
                               border: OutlineInputBorder(),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: lastNameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Last Name *',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
+                        // const SizedBox(width: 16),
+                        // Expanded(
+                        //   child: TextFormField(
+                        //     controller: lastNameController,
+                        //     decoration: const InputDecoration(
+                        //       labelText: 'Last Name *',
+                        //       border: OutlineInputBorder(),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -119,28 +117,28 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           child: TextFormField(
                             controller: addressController,
                             decoration: const InputDecoration(
-                              labelText: 'Address *',
+                              labelText: 'PLZ & Wohnort  *',
                               border: OutlineInputBorder(),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: postalCodeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Postal Code *',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
+                        // const SizedBox(width: 16),
+                        // Expanded(
+                        //   child: TextFormField(
+                        //     controller: postalCodeController,
+                        //     decoration: const InputDecoration(
+                        //       labelText: 'Postal Code *',
+                        //       border: OutlineInputBorder(),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: cityController,
                       decoration: const InputDecoration(
-                        labelText: 'City *',
+                        labelText: 'Straße & Hausnummer *',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -151,7 +149,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           child: TextFormField(
                             controller: phoneController,
                             decoration: const InputDecoration(
-                              labelText: 'Phone Number *',
+                              labelText: 'Telefonnummer  *',
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -161,7 +159,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           child: TextFormField(
                             controller: emailController,
                             decoration: const InputDecoration(
-                              labelText: 'Email Address *',
+                              labelText: 'E-Mail des Empfängers *',
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -178,9 +176,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                               MaterialPageRoute(
                                 builder: (context) => DataTelponeScreen(
                                   firstName: firstNameController.text,
-                                  lastName: lastNameController.text,
                                   address: addressController.text,
-                                  postalCode: postalCodeController.text,
                                   city: cityController.text,
                                   phoneNumber: phoneController.text,
                                   emailAddress: emailController.text,
@@ -189,7 +185,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                             );
                           }
                         },
-                        child: const Text('Next'),
+                        child: const Text('Weiter'),
                       ),
                     ),
                   ],

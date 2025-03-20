@@ -7,9 +7,7 @@ import 'package:intl/intl.dart';
 
 class DataTelponeScreen extends StatefulWidget {
   final String firstName;
-  final String lastName;
   final String address;
-  final String postalCode;
   final String city;
   final String phoneNumber;
   final String emailAddress;
@@ -17,9 +15,7 @@ class DataTelponeScreen extends StatefulWidget {
   const DataTelponeScreen({
     Key? key,
     required this.firstName,
-    required this.lastName,
     required this.address,
-    required this.postalCode,
     required this.city,
     required this.phoneNumber,
     required this.emailAddress,
@@ -33,6 +29,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController deviceTypesController = TextEditingController();
+  final TextEditingController serialNumberController = TextEditingController();
   final TextEditingController repairPriceController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
@@ -55,11 +52,17 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   ];
 
   final List<String> issueOptions = [
-    'Screen',
-    'Battery',
-    'Camera',
-    'Speaker',
-    'Charging Port',
+    'Display ',
+    'Akku ',
+    'Kamera ',
+    'Kameraglas ',
+    'Hörmuschel ',
+    'Ladebuchse  ',
+    'Lautsprecher ',
+    'Rückseite ',
+    'Wasserschaden',
+    'Geht nicht an',
+
   ];
 
   String? selectedIssue;
@@ -80,7 +83,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Device Data'),
+        title: const Text(' Daten '),
         backgroundColor: Colors.blue,
       ),
       body: SingleChildScrollView(
@@ -92,7 +95,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
             children: [
               // اختيار نوع الجهاز
               _buildDropdownField(
-                label: 'Device Type *',
+                label: 'Geräte-Typ *',
                 value: selectedDeviceType,
                 items: deviceTypes,
                 onChanged: (value) {
@@ -103,12 +106,18 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               ),
               const SizedBox(height: 16.0),
 
+
               // موديل الجهاز
               _buildInputField(
                 controller: modelController,
-                label: 'Device Model *',
+                label: 'Modellnummer *',
               ),
               const SizedBox(height: 16.0),
+              _buildInputField(
+                controller: serialNumberController,
+                label: 'Geräte-Nummer *',
+
+              ),              const SizedBox(height: 16.0),
 
               // المشاكل داخل Card
               Card(
@@ -122,7 +131,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Issues:',
+                        'Problem:',
                         style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
@@ -135,7 +144,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       DropdownButtonFormField<String>(
                         value: selectedIssue,
                         decoration: const InputDecoration(
-                          labelText: 'Select an Issue',
+                          labelText: 'Probleme/Defekt',
                           border: OutlineInputBorder(),
                         ),
                         items: issueOptions
@@ -179,7 +188,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       TextFormField(
                         controller: customIssueController,
                         decoration: InputDecoration(
-                          labelText: 'Add Custom Issue',
+                          labelText: 'Anmerkungen',
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.add),
@@ -206,7 +215,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               // سعر التصليح
               _buildInputField(
                 controller: repairPriceController,
-                label: 'Repair Price *',
+                label: 'Reparatur Preis *',
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16.0),
@@ -214,7 +223,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               // تاريخ البداية
               _buildDateField(
                 controller: startDateController,
-                label: 'Start Date *',
+                label: 'Anfang *',
                 context: context,
               ),
               const SizedBox(height: 16.0),
@@ -222,7 +231,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               // تاريخ النهاية
               _buildDateField(
                 controller: endDateController,
-                label: 'End Date *',
+                label: 'Abholung *',
                 context: context,
               ),
               const SizedBox(height: 20.0),
@@ -249,14 +258,13 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                     try {
                       CustomerModel model = CustomerModel(
                         customerFirstName: widget.firstName.trim(),
-                        customerLastName: widget.lastName.trim(),
                         address: widget.address.trim(),
-                        postalCode: widget.postalCode.trim(),
                         city: widget.city.trim(),
                         phoneNumber: widget.phoneNumber.trim(),
                         emailAddress: widget.emailAddress.trim(),
                         deviceType: selectedDeviceType ?? '',
                         deviceModel: modelController.text.trim(),
+                        serialNumber: serialNumberController.text.trim(),
                         issue: selectedIssues.isNotEmpty
                             ? selectedIssues.join(', ')
                             : 'No Issues',
@@ -291,7 +299,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                     }
                   },
                   child: const Text(
-                    'Save Data',
+                    'Speicher Daten',
                     style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
