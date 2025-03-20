@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:handy_notfall/firebase_options.dart';
 import 'package:handy_notfall/login/login.dart';
 import 'package:handy_notfall/screens/data_of_custmer_screen.dart';
-import 'package:handy_notfall/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding

@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/firebase_function.dart';
+import 'package:handy_notfall/data/custom_dropdown.dart';
+import 'package:handy_notfall/data/custom_input_field.dart';
+import 'package:handy_notfall/data/customer_service.dart';
+import 'package:handy_notfall/data/date_picker_field.dart';
+import 'package:handy_notfall/data/issue_selection.dart';
 import 'package:handy_notfall/models/customer_model.dart';
 import 'package:intl/intl.dart';
 
@@ -30,6 +34,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final TextEditingController modelController = TextEditingController();
   final TextEditingController deviceTypesController = TextEditingController();
   final TextEditingController serialNumberController = TextEditingController();
+  final TextEditingController pinCodeController = TextEditingController();
   final TextEditingController repairPriceController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
@@ -49,6 +54,15 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Asus',
     'Acer',
     'Microsoft',
+    'Realme',
+    'HTC',
+    'Motorola',
+    'Blackberry',
+    'Xiaomi',
+    'Caterpillar',
+    'Oppo',
+    'Google',
+    'Oneplus',
   ];
 
   final List<String> issueOptions = [
@@ -62,7 +76,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Rückseite ',
     'Wasserschaden',
     'Geht nicht an',
-
   ];
 
   String? selectedIssue;
@@ -94,7 +107,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // اختيار نوع الجهاز
-              _buildDropdownField(
+              CustomDropdown(
                 label: 'Geräte-Typ *',
                 value: selectedDeviceType,
                 items: deviceTypes,
@@ -105,137 +118,52 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                 },
               ),
               const SizedBox(height: 16.0),
-
-
-              // موديل الجهاز
-              _buildInputField(
-                controller: modelController,
-                label: 'Modellnummer *',
-              ),
+              CustomInputField(
+                  controller: modelController, label: 'Modellnummer *'),
               const SizedBox(height: 16.0),
-              _buildInputField(
-                controller: serialNumberController,
-                label: 'Geräte-Nummer *',
-
-              ),              const SizedBox(height: 16.0),
-
-              // المشاكل داخل Card
-              Card(
-                elevation: 4.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Problem:',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-
-                      // اختيار عطل من القائمة
-                      DropdownButtonFormField<String>(
-                        value: selectedIssue,
-                        decoration: const InputDecoration(
-                          labelText: 'Probleme/Defekt',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: issueOptions
-                            .map((issue) => DropdownMenuItem(
-                                  value: issue,
-                                  child: Text(issue),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedIssue = value;
-                            if (value != null &&
-                                !selectedIssues.contains(value)) {
-                              selectedIssues.add(value);
-                            }
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16.0),
-
-                      // عرض الأعطال المختارة
-                      if (selectedIssues.isNotEmpty)
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
-                          children: selectedIssues.map((issue) {
-                            return Chip(
-                              label: Text(issue),
-                              deleteIcon: const Icon(Icons.close),
-                              onDeleted: () {
-                                setState(() {
-                                  selectedIssues.remove(issue);
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      const SizedBox(height: 16.0),
-
-                      // إضافة عطل يدويًا
-                      TextFormField(
-                        controller: customIssueController,
-                        decoration: InputDecoration(
-                          labelText: 'Anmerkungen',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              if (customIssueController.text.isNotEmpty &&
-                                  !selectedIssues
-                                      .contains(customIssueController.text)) {
-                                setState(() {
-                                  selectedIssues
-                                      .add(customIssueController.text);
-                                  customIssueController.clear();
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              CustomInputField(
+                  controller: serialNumberController, label: 'Seriennummer *'),
+              const SizedBox(height: 16.0),
+              CustomInputField(
+                  controller: pinCodeController, label: ' Speer/Pin Code *'),
+              const SizedBox(height: 16.0),
+              // تحديد واضافه عطل الي هي card
+              IssueSelection(
+                issueOptions: issueOptions,
+                selectedIssues: selectedIssues,
+                customIssueController: customIssueController,
+                onAddIssue: (issue) {
+                  setState(() {
+                    selectedIssues.add(issue);
+                  });
+                },
+                onRemoveIssue: (issue) {
+                  setState(() {
+                    selectedIssues.remove(issue);
+                  });
+                },
               ),
               const SizedBox(height: 16.0),
 
               // سعر التصليح
-              _buildInputField(
+              CustomInputField(
                 controller: repairPriceController,
                 label: 'Reparatur Preis *',
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16.0),
-
               // تاريخ البداية
-              _buildDateField(
-                controller: startDateController,
-                label: 'Anfang *',
-                context: context,
-              ),
+              DatePickerField(
+                  controller: startDateController, label: 'Anfang *'),
+
               const SizedBox(height: 16.0),
 
               // تاريخ النهاية
-              _buildDateField(
+              DatePickerField(
                 controller: endDateController,
                 label: 'Abholung *',
-                context: context,
               ),
               const SizedBox(height: 20.0),
-
               // زر الحفظ
               Center(
                 child: ElevatedButton(
@@ -248,10 +176,13 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                     ),
                   ),
                   onPressed: () async {
-                    String? userEmail = FirebaseAuth.instance.currentUser?.email;
+                    String? userEmail =
+                        FirebaseAuth.instance.currentUser?.email;
                     if (userEmail == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text(' يجب تسجيل الدخول أولاً!')),
+                        const SnackBar(
+                            content: Text(
+                                ' Sie müssen sich zuerst anmelden! ')), //يجب تسجيل الدخول أولاً!
                       );
                       return;
                     }
@@ -265,6 +196,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         deviceType: selectedDeviceType ?? '',
                         deviceModel: modelController.text.trim(),
                         serialNumber: serialNumberController.text.trim(),
+                        pinCode: pinCodeController.text.trim(),
                         issue: selectedIssues.isNotEmpty
                             ? selectedIssues.join(', ')
                             : 'No Issues',
@@ -281,10 +213,11 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                                 .parse(endDateController.text.trim()))
                             : Timestamp.now(),
                         isDone: false,
-                        userEmail: userEmail, // ✅ احفظ البريد الإلكتروني مع البيانات
+                        userEmail:
+                            userEmail, // ✅ احفظ البريد الإلكتروني مع البيانات
                       );
 
-                      await FirebaseFireStore.addCustomer(model);
+                      await CustomerService.saveCustomer(model);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -312,73 +245,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  // TODO NEW CLASS
-  // حقل إدخال عام
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
-
-  // حقل إدخال تاريخ
-  Widget _buildDateField({
-    required TextEditingController controller,
-    required String label,
-    required BuildContext context,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      readOnly: true,
-      onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime.now(),
-          lastDate: DateTime(2100),
-        );
-        if (pickedDate != null) {
-          controller.text = pickedDate.toString().split(' ')[0];
-        }
-      },
-    );
-  }
-
-  // حقل اختيار منسدلة
-  Widget _buildDropdownField({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      items: items
-          .map((item) => DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              ))
-          .toList(),
-      onChanged: onChanged,
     );
   }
 }

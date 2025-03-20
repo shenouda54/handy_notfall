@@ -11,6 +11,7 @@ class CustomerModel {
   String deviceModel;
   String issue;
   String serialNumber;
+  String pinCode;
   int price;
   Timestamp startDate;
   Timestamp endDate;
@@ -28,6 +29,7 @@ class CustomerModel {
     required this.deviceModel,
     required this.issue,
     required this.serialNumber,
+    required this.pinCode,
     required this.price,
     required this.userEmail,
     Timestamp? startDate,
@@ -48,6 +50,7 @@ class CustomerModel {
       deviceModel: json['deviceModel'],
       issue: json['issue'],
       serialNumber: json['serialNumber'],
+      pinCode: json['pinCode'],
       price: json['price'],
       startDate: json['startDate'] != null ? json['startDate'] as Timestamp : Timestamp.now(),
       endDate: json['endDate'] != null ? json['endDate'] as Timestamp : Timestamp.now(),
@@ -68,6 +71,7 @@ class CustomerModel {
       "deviceModel": deviceModel,
       "issue": issue,
       "serialNumber": serialNumber,
+      "pinCode": pinCode,
       "price": price,
       "startDate": startDate,
       "endDate": endDate,
