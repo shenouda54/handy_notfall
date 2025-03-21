@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:handy_notfall/models/customer_details_screen.dart';
+import 'package:intl/intl.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -11,34 +13,46 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+  String? selectedDeviceType;
+
   List<Map<String, dynamic>> customers = [];
   List<Map<String, dynamic>> filteredCustomers = [];
+
+  final List<String> deviceTypes = [
+    'Dell', 'Apple', 'Samsung', 'HP', 'Lenovo', 'Sony',
+    'LG', 'Huawei', 'Toshiba', 'Asus', 'Acer', 'Microsoft',
+    'Realme', 'HTC', 'Motorola', 'Blackberry', 'Xiaomi', 'Oppo', 'Google', 'Oneplus'
+  ];
 
   @override
   void initState() {
     super.initState();
-    fetchCustomers(); // تحميل البيانات عند فتح الشاشة
+    fetchCustomers();
   }
 
-  /// 🔥 **تحميل البيانات من Firestore**
   Future<void> fetchCustomers() async {
     try {
-      String? userEmail = FirebaseAuth.instance.currentUser?.email; // 🔥 احصل على الإيميل الحالي
-
+      String? userEmail = FirebaseAuth.instance.currentUser?.email;
       if (userEmail == null) {
-        print(" لم يتم العثور على المستخدم الحالي!");
+        print("❌ لم يتم العثور على المستخدم الحالي!");
         return;
       }
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('Customers')
-          .where('userEmail', isEqualTo: userEmail) // ✅ جلب البيانات المرتبطة فقط بالمستخدم الحالي
+          .where('userEmail', isEqualTo: userEmail)
           .get();
+
       List<Map<String, dynamic>> customerList = querySnapshot.docs.map((doc) {
         return {
           "firstName": doc["customerFirstName"] ?? "",
-          "lastName": doc["customerLastName"] ?? "",
           "phone": doc["phoneNumber"] ?? "",
-          "id": doc.id, // تخزين الـ ID لو احتجنا تحديث أو حذف العميل
+          "deviceType": doc["deviceType"] ?? "",
+          "startDate": doc["startDate"] != null
+              ? (doc["startDate"] as Timestamp).toDate()
+              : DateTime.now(),
+          "price": doc["price"] ?? 0,
+          "id": doc.id,
         };
       }).toList();
 
@@ -51,69 +65,122 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  ///  **البحث في البيانات**
-  void filterSearchResults(String query) {
+  void filterSearch() {
+    String query = searchController.text.toLowerCase();
+    String? selectedType = selectedDeviceType;
+    String selectedDate = dateController.text.trim();
+
     setState(() {
-      if (query.isEmpty) {
-        filteredCustomers = customers;
-      } else {
-        filteredCustomers = customers.where((customer) {
-          return customer["firstName"]
-                  .toLowerCase()
-                  .contains(query.toLowerCase()) ||
-              customer["lastName"]
-                  .toLowerCase()
-                  .contains(query.toLowerCase()) ||
-              customer["phone"].contains(query);
-        }).toList();
-      }
+      filteredCustomers = customers.where((customer) {
+        bool matchesSearch = customer["firstName"].toLowerCase().contains(query) ||
+            customer["phone"].contains(query);
+
+        bool matchesDevice = selectedType == null || selectedType.isEmpty
+            ? true
+            : customer["deviceType"] == selectedType;
+
+        bool matchesDate = selectedDate.isEmpty
+            ? true
+            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) == selectedDate;
+
+        return matchesSearch && matchesDevice && matchesDate;
+      }).toList();
     });
+  }
+
+  Future<void> pickDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+      filterSearch();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: "Search customers...",
-            border: InputBorder.none,
-          ),
-          onChanged: filterSearchResults,
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back), // 🔙 زر الرجوع للخلف
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              searchController.clear();
-              filterSearchResults("");
-            },
-          ),
-        ],
-      ),
-      body: filteredCustomers.isEmpty
-          ? const Center(child: Text("No results found"))
-          : ListView.builder(
-              itemCount: filteredCustomers.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    "${filteredCustomers[index]['firstName']} ${filteredCustomers[index]['lastName']}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text("Phone: ${filteredCustomers[index]['phone']}"),
-                  leading: const Icon(Icons.person),
-                );
+      appBar: AppBar(title: const Text("Search Customers")),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Search Field
+            TextField(
+              controller: searchController,
+              decoration: const InputDecoration(
+                hintText: "Search by Name or Phone...",
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) => filterSearch(),
+            ),
+            const SizedBox(height: 12),
+
+            // Device Type Dropdown
+            DropdownButtonFormField<String>(
+              value: selectedDeviceType,
+              decoration: const InputDecoration(
+                labelText: "Filter by Device Type",
+                border: OutlineInputBorder(),
+              ),
+              items: deviceTypes.map((type) {
+                return DropdownMenuItem(value: type, child: Text(type));
+              }).toList(),
+              onChanged: (value) {
+                selectedDeviceType = value;
+                filterSearch();
               },
             ),
+            const SizedBox(height: 12),
+
+            // Date Filter
+            TextField(
+              controller: dateController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: "Filter by Start Date",
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: pickDate,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Results
+            Expanded(
+              child: filteredCustomers.isEmpty
+                  ? const Center(child: Text("No results found"))
+                  : ListView.builder(
+                itemCount: filteredCustomers.length,
+                itemBuilder: (context, index) {
+                  final customer = filteredCustomers[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(customer["firstName"]),
+                      subtitle: Text(
+                        "Phone: ${customer["phone"]}\nDevice: ${customer["deviceType"]}\nPrice: ${customer["price"]}€",
+                      ),onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CustomerDetailsScreen(customerId: customer['id']),
+                        ),
+                      );
+                    },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
