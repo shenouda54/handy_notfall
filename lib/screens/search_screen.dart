@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/models/customer_details_screen.dart';
+import 'package:handy_notfall/models/edit_customer_screen.dart';
 import 'package:intl/intl.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -165,7 +166,21 @@ class _SearchScreenState extends State<SearchScreen> {
                       title: Text(customer["firstName"]),
                       subtitle: Text(
                         "Phone: ${customer["phone"]}\nDevice: ${customer["deviceType"]}\nPrice: ${customer["price"]}€",
-                      ),onTap: () {
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditCustomerScreen(
+                                customerId: customer['id'],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(

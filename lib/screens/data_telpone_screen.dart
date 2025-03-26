@@ -76,6 +76,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Rückseite ',
     'Wasserschaden',
     'Geht nicht an',
+    'Datenübertragung',
   ];
 
   String? selectedIssue;
@@ -224,7 +225,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                             content: Text('Data Saved Successfully!')),
                       );
 
-                      Navigator.pop(context);
+                      Navigator.pop(context,true);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Failed to save data: $e')),

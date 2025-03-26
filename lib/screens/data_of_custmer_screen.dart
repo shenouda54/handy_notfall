@@ -37,6 +37,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
     searchController.dispose();
     super.dispose();
   }
+  void _clearForm() {
+    firstNameController.clear();
+    addressController.clear();
+    cityController.clear();
+    phoneController.clear();
+    emailController.clear();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,47 +106,28 @@ class _CustomerScreenState extends State<CustomerScreen> {
                             ),
                           ),
                         ),
-                        // const SizedBox(width: 16),
-                        // Expanded(
-                        //   child: TextFormField(
-                        //     controller: lastNameController,
-                        //     decoration: const InputDecoration(
-                        //       labelText: 'Last Name *',
-                        //       border: OutlineInputBorder(),
-                        //     ),
-                        //   ),
-                        // ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            controller: addressController,
+                          child:    TextFormField(
+                            controller: cityController,
                             decoration: const InputDecoration(
-                              labelText: 'PLZ & Wohnort  *',
+                              labelText: 'Straße & Hausnummer *',
                               border: OutlineInputBorder(),
                             ),
                           ),
                         ),
-                        // const SizedBox(width: 16),
-                        // Expanded(
-                        //   child: TextFormField(
-                        //     controller: postalCodeController,
-                        //     decoration: const InputDecoration(
-                        //       labelText: 'Postal Code *',
-                        //       border: OutlineInputBorder(),
-                        //     ),
-                        //   ),
-                        // ),
                       ],
                     ),
+
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: cityController,
+                      controller: addressController,
                       decoration: const InputDecoration(
-                        labelText: 'Straße & Hausnummer *',
+                        labelText: 'PLZ & Wohnort  *',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -169,9 +158,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     const SizedBox(height: 20),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async{
                           if (_formKey.currentState!.validate()) {
-                            Navigator.push(
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => DataTelponeScreen(
@@ -183,6 +172,25 @@ class _CustomerScreenState extends State<CustomerScreen> {
                                 ),
                               ),
                             );
+
+                            if (result == true) {
+                              _clearForm(); // 🧹 تمسح الفورم لو حبيت
+                              setState(() {}); // 🔁 تحدث الصفحة
+                            }
+
+
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => DataTelponeScreen(
+                            //       firstName: firstNameController.text,
+                            //       address: addressController.text,
+                            //       city: cityController.text,
+                            //       phoneNumber: phoneController.text,
+                            //       emailAddress: emailController.text,
+                            //     ),
+                            //   ),
+                            // );
                           }
                         },
                         child: const Text('Weiter'),
