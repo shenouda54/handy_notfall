@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // ✖ الإيميل مسجل بالفعل
         setState(() {
           isLoading = false;
-          errorMessage = ' هذا البريد الإلكتروني مسجل مسبقًا.';
+          errorMessage = 'Diese E-Mail-Adresse ist bereits registriert. '; //هذا البريد الإلكتروني مسجل مسبقًا.
         });
         return;
       }
@@ -49,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } on FirebaseAuthException catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = '❌ خطأ: ${e.message}';
+        errorMessage = '❌Fehler: ${e.message}';
       });
     }
   }
@@ -57,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('إنشاء حساب جديد')),
+      appBar: AppBar(title: const Text('Erstelle ein neues Konto')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -65,13 +65,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'البريد الإلكتروني'),
+              decoration: const InputDecoration(labelText: 'E-Mail'),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: 'كلمة المرور'),
+              decoration: const InputDecoration(labelText: 'Passwort '),
               obscureText: true,
             ),
             const SizedBox(height: 16),
@@ -82,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
               onPressed: _register,
-              child: const Text('إنشاء حساب'),
+              child: const Text('Erstelle ein neues Konto'),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -92,7 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: const Text('لديك حساب بالفعل؟ تسجيل الدخول'),
+              child: const Text('Hast du bereits ein Konto? Anmelden'),  //لديك حساب بالفعل؟ تسجيل الدخول
             ),
           ],
         ),

@@ -37,11 +37,11 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = false;
         if (e.code == 'user-not-found') {
-          errorMessage = ' لا يوجد حساب بهذا البريد الإلكتروني.';
+          errorMessage = 'Es gibt kein Konto mit dieser E-MailAdresse.';   // لا يوجد حساب بهذا البريد الإلكتروني.
         } else if (e.code == 'wrong-password') {
-          errorMessage = ' كلمة المرور غير صحيحة.';
+          errorMessage = 'Das Passwort ist falsch. ';//كلمة المرور غير صحيحة.
         } else {
-          errorMessage = ' حدث خطأ: ${e.message}';
+          errorMessage = ' Ein Fehler ist aufgetreten: ${e.message}';  //حدث خطأ:
         }
       });
     }
@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('تسجيل الدخول')),
+      appBar: AppBar(title: const Text('Anmelden')), //تسجيل الدخول
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -58,13 +58,13 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'البريد الإلكتروني'),
+              decoration: const InputDecoration(labelText: 'E-Mail'), //البريد الإلكتروني
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: 'كلمة المرور'),
+              decoration: const InputDecoration(labelText: 'Passwort'),//كلمة المرور
               obscureText: true,
             ),
             const SizedBox(height: 16),
@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
               onPressed: _login,
-              child: const Text('تسجيل الدخول'),
+              child: const Text(' Anmelden'),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   MaterialPageRoute(builder: (context) => const RegisterScreen(),),
                 );
               },
-              child: const Text('ليس لديك حساب؟ أنشئ حساب جديد'),
+              child: const Text('Hast du kein Konto? Erstell dir ein neues'), //ليس لديك حساب؟ أنشئ حساب جديد
             ),
           ],
         ),

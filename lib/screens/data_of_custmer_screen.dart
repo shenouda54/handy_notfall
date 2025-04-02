@@ -15,6 +15,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
     await FirebaseAuth.instance.signOut(); // ✅ تسجيل الخروج من Firebase
     // سيتم التحويل تلقائيًا إلى `LoginScreen` بفضل `StreamBuilder` في `main.dart`
   }
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
@@ -37,6 +38,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
     searchController.dispose();
     super.dispose();
   }
+
   void _clearForm() {
     firstNameController.clear();
     addressController.clear();
@@ -44,7 +46,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     phoneController.clear();
     emailController.clear();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +69,25 @@ class _CustomerScreenState extends State<CustomerScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _signOut, //  تسجيل الخروج عند الضغط
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Abmelden"),  //تأكيد الخروج
+                  actions: [
+                    TextButton(
+                      child: const Text("Abmelden"),
+                      onPressed: () async {
+                        Navigator.pop(context); // إغلاق الديالوج
+                        await FirebaseAuth.instance.signOut(); // تسجيل الخروج
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
+
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -112,7 +130,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child:    TextFormField(
+                          child: TextFormField(
                             controller: cityController,
                             decoration: const InputDecoration(
                               labelText: 'Straße & Hausnummer *',
@@ -122,7 +140,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: addressController,
@@ -158,7 +175,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     const SizedBox(height: 20),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () async{
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             final result = await Navigator.push(
                               context,
@@ -174,23 +191,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
                             );
 
                             if (result == true) {
-                              _clearForm(); // 🧹 تمسح الفورم لو حبيت
-                              setState(() {}); // 🔁 تحدث الصفحة
+                              _clearForm(); //  تمسح الفورم لو حبيت
+                              setState(() {}); // تحدث الصفحة
                             }
-
-
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => DataTelponeScreen(
-                            //       firstName: firstNameController.text,
-                            //       address: addressController.text,
-                            //       city: cityController.text,
-                            //       phoneNumber: phoneController.text,
-                            //       emailAddress: emailController.text,
-                            //     ),
-                            //   ),
-                            // );
                           }
                         },
                         child: const Text('Weiter'),

@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/models/customer_details_screen.dart';
-import 'package:handy_notfall/models/edit_customer_screen.dart';
+import 'package:handy_notfall/models/customer_list_tile.dart';
 import 'package:intl/intl.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -21,9 +20,26 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Map<String, dynamic>> filteredCustomers = [];
 
   final List<String> deviceTypes = [
-    'Dell', 'Apple', 'Samsung', 'HP', 'Lenovo', 'Sony',
-    'LG', 'Huawei', 'Toshiba', 'Asus', 'Acer', 'Microsoft',
-    'Realme', 'HTC', 'Motorola', 'Blackberry', 'Xiaomi', 'Oppo', 'Google', 'Oneplus'
+    'Dell',
+    'Apple',
+    'Samsung',
+    'HP',
+    'Lenovo',
+    'Sony',
+    'LG',
+    'Huawei',
+    'Toshiba',
+    'Asus',
+    'Acer',
+    'Microsoft',
+    'Realme',
+    'HTC',
+    'Motorola',
+    'Blackberry',
+    'Xiaomi',
+    'Oppo',
+    'Google',
+    'Oneplus'
   ];
 
   @override
@@ -49,10 +65,16 @@ class _SearchScreenState extends State<SearchScreen> {
           "firstName": doc["customerFirstName"] ?? "",
           "phone": doc["phoneNumber"] ?? "",
           "deviceType": doc["deviceType"] ?? "",
+          "deviceModel": doc["deviceModel"] ?? "",
+          "pinCode": doc["pinCode"] ?? "",
           "startDate": doc["startDate"] != null
               ? (doc["startDate"] as Timestamp).toDate()
               : DateTime.now(),
           "price": doc["price"] ?? 0,
+          "issue": doc["issue"] ?? "",
+          "address": doc["address"] ?? "",
+          "city": doc["city"] ?? "",
+          "email": doc["emailAddress"] ?? "",
           "id": doc.id,
         };
       }).toList();
@@ -73,8 +95,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     setState(() {
       filteredCustomers = customers.where((customer) {
-        bool matchesSearch = customer["firstName"].toLowerCase().contains(query) ||
-            customer["phone"].contains(query);
+        bool matchesSearch =
+            customer["firstName"].toLowerCase().contains(query) ||
+                customer["phone"].contains(query);
 
         bool matchesDevice = selectedType == null || selectedType.isEmpty
             ? true
@@ -82,7 +105,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
         bool matchesDate = selectedDate.isEmpty
             ? true
-            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) == selectedDate;
+            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) ==
+                selectedDate;
 
         return matchesSearch && matchesDevice && matchesDate;
       }).toList();
@@ -105,7 +129,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Search Customers")),
+      appBar: AppBar(title: const Text("Suche Kunden")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -114,7 +138,7 @@ class _SearchScreenState extends State<SearchScreen> {
             TextField(
               controller: searchController,
               decoration: const InputDecoration(
-                hintText: "Search by Name or Phone...",
+                hintText: "Suche nach Name oder Telefonnummer...",
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) => filterSearch(),
@@ -125,7 +149,7 @@ class _SearchScreenState extends State<SearchScreen> {
             DropdownButtonFormField<String>(
               value: selectedDeviceType,
               decoration: const InputDecoration(
-                labelText: "Filter by Device Type",
+                labelText: "Filter nach Gerätetyp",
                 border: OutlineInputBorder(),
               ),
               items: deviceTypes.map((type) {
@@ -143,7 +167,7 @@ class _SearchScreenState extends State<SearchScreen> {
               controller: dateController,
               readOnly: true,
               decoration: InputDecoration(
-                labelText: "Filter by Start Date",
+                labelText: "Filtern nach Startdatum",
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.calendar_today),
@@ -156,42 +180,18 @@ class _SearchScreenState extends State<SearchScreen> {
             // Results
             Expanded(
               child: filteredCustomers.isEmpty
-                  ? const Center(child: Text("No results found"))
+                  ? const Center(child: Text("Keine Ergebnisse gefunden"))
                   : ListView.builder(
-                itemCount: filteredCustomers.length,
-                itemBuilder: (context, index) {
-                  final customer = filteredCustomers[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(customer["firstName"]),
-                      subtitle: Text(
-                        "Phone: ${customer["phone"]}\nDevice: ${customer["deviceType"]}\nPrice: ${customer["price"]}€",
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditCustomerScreen(
-                                customerId: customer['id'],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CustomerDetailsScreen(customerId: customer['id']),
-                        ),
-                      );
-                    },
+                      itemCount: filteredCustomers.length,
+                      itemBuilder: (context, index) {
+                        final customer = filteredCustomers[index];
+                        return Card(
+                            child: CustomerListTile(
+                          customer: customer,
+                          onEdit: fetchCustomers, //  عشان يعمل تحديث مباشرة
+                        ));
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

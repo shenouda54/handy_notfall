@@ -8,7 +8,7 @@ class CustomerDetailsScreen extends StatelessWidget {
 
   Future<DocumentSnapshot> fetchCustomerDetails() async {
     return await FirebaseFirestore.instance
-        .collection('Customers')
+        .collection('Customers') //
         .doc(customerId)
         .get();
   }
@@ -16,7 +16,7 @@ class CustomerDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Customer Details')),
+      appBar: AppBar(title: const Text('Kundendetails')), //Customer Details
       body: FutureBuilder<DocumentSnapshot>(
         future: fetchCustomerDetails(),
         builder: (context, snapshot) {
@@ -24,7 +24,7 @@ class CustomerDetailsScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text("No Data Found"));
+            return const Center(child: Text("Keine Daten gefunden"));  //No Data Found
           }
 
           var data = snapshot.data!.data() as Map<String, dynamic>;
@@ -34,17 +34,17 @@ class CustomerDetailsScreen extends StatelessWidget {
             child: ListView(
               children: [
                 detailRow('Name', data['customerFirstName']),
-                detailRow('Phone', data['phoneNumber']),
-                detailRow('Address', data['address']),
-                detailRow('City', data['city']),
-                detailRow('Device Type', data['deviceType']),
-                detailRow('Device Model', data['deviceModel']),
-                detailRow('Serial Number', data['serialNumber']),
-                detailRow('Pin Code', data['pinCode']),
-                detailRow('Issue', data['issue']),
-                detailRow('Price', "${data['price']} €"),
-                detailRow('Start Date', (data['startDate'] as Timestamp).toDate().toString().split(' ')[0]),
-                detailRow('End Date', (data['endDate'] as Timestamp).toDate().toString().split(' ')[0]),
+                detailRow('Handynummer', data['phoneNumber']),
+                detailRow('Adresse', data['address']),
+                detailRow('Stadt', data['city']),
+                detailRow('Gerätetyp', data['deviceType']),
+                detailRow('Modell', data['deviceModel']),
+                detailRow('Seriennummer', data['serialNumber']),
+                detailRow('PIN code', data['pinCode']),
+                detailRow('Problem', data['issue']),
+                detailRow('Preis', "${data['price']} €"),
+                detailRow('Startdatum', (data['startDate'] as Timestamp).toDate().toString().split(' ')[0]),
+                detailRow('Enddatum ', (data['endDate'] as Timestamp).toDate().toString().split(' ')[0]),
                 detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
                 const SizedBox(height: 20),
 
@@ -53,7 +53,7 @@ class CustomerDetailsScreen extends StatelessWidget {
                   onPressed: () async {
                     await generatePdf(data);
                   },
-                  child: const Text('Download PDF'),
+                  child: const Text('Herunterladen als PDF'),
                 ),
               ],
             ),
