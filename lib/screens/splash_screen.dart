@@ -29,23 +29,23 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // خلفية سوداء
+      backgroundColor: Colors.black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/logo_handynotfall-white.webp', // شعار التطبيق
-              width: MediaQuery.of(context).size.width * 0.6, // عرض الصورة
+              'assets/images/logo_handynotfall-white.webp',
+              width: MediaQuery.of(context).size.width * 0.6,
             ),
             const SizedBox(height: 20.0),
             const Text(
               'HandyNotfall',
               style: TextStyle(
-                color: Color(0xFFE53935), // الأحمر للعناوين الكبيرة
+                color: Color(0xFFE53935),
                 fontSize: 28.0,
                 fontWeight: FontWeight.bold,
-              ), // النص بالأحمر الكبير
+              ),
             ),
           ],
         ),

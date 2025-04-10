@@ -48,13 +48,13 @@ class CustomerDetailsScreen extends StatelessWidget {
                 detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
                 const SizedBox(height: 20),
 
-                // 🔥 زرار تحميل الـ PDF
                 ElevatedButton(
                   onPressed: () async {
-                    await generatePdf(data);
+                    await generatePdf(data, context);
                   },
                   child: const Text('Herunterladen als PDF'),
                 ),
+
               ],
             ),
           );
