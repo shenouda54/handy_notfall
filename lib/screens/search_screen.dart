@@ -19,28 +19,8 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Map<String, dynamic>> customers = [];
   List<Map<String, dynamic>> filteredCustomers = [];
 
-  final List<String> deviceTypes = [
-    'Dell',
-    'Apple',
-    'Samsung',
-    'HP',
-    'Lenovo',
-    'Sony',
-    'LG',
-    'Huawei',
-    'Toshiba',
-    'Asus',
-    'Acer',
-    'Microsoft',
-    'Realme',
-    'HTC',
-    'Motorola',
-    'Blackberry',
-    'Xiaomi',
-    'Oppo',
-    'Google',
-    'Oneplus'
-  ];
+  final TextEditingController modelController = TextEditingController();
+
 
   @override
   void initState() {
@@ -99,18 +79,18 @@ class _SearchScreenState extends State<SearchScreen> {
             customer["firstName"].toLowerCase().contains(query) ||
                 customer["phone"].contains(query);
 
-        bool matchesDevice = selectedType == null || selectedType.isEmpty
-            ? true
-            : customer["deviceType"] == selectedType;
+        bool matchesDeviceText = modelController.text.trim().isEmpty ||
+            customer["deviceType"].toLowerCase().contains(modelController.text.toLowerCase()) ||
+            customer["deviceModel"].toLowerCase().contains(modelController.text.toLowerCase());
 
         bool matchesDate = selectedDate.isEmpty
             ? true
-            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) ==
-                selectedDate;
+            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) == selectedDate;
 
-        return matchesSearch && matchesDevice && matchesDate;
+        return matchesSearch && matchesDate && matchesDeviceText;
       }).toList();
     });
+
   }
 
   Future<void> pickDate() async {
@@ -145,23 +125,16 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Device Type Dropdown
-            DropdownButtonFormField<String>(
-              value: selectedDeviceType,
+            // Device Type
+            TextField(
+              controller: modelController,
               decoration: const InputDecoration(
-                labelText: "Filter nach Gerätetyp",
+                labelText: "Gerätemodell eingeben...",
                 border: OutlineInputBorder(),
               ),
-              items: deviceTypes.map((type) {
-                return DropdownMenuItem(value: type, child: Text(type));
-              }).toList(),
-              onChanged: (value) {
-                selectedDeviceType = value;
-                filterSearch();
-              },
+              onChanged: (value) => filterSearch(),
             ),
             const SizedBox(height: 12),
-
             // Date Filter
             TextField(
               controller: dateController,

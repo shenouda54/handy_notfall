@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:open_file/open_file.dart';
+
 
 /// طلب صلاحية التخزين (مناسبة لـ Android 8.1)
 Future<bool> requestStoragePermission() async {
@@ -18,7 +20,7 @@ Future<bool> requestStoragePermission() async {
 }
 
 /// توليد ملف PDF من بيانات العميل وحفظه باسم مختلف في Downloads
-Future<void> generatePdf(Map<String, dynamic> data, BuildContext context) async {
+Future<void> generatePdf(Map<String, dynamic> data, BuildContext context,int printId) async {
   final pdf = pw.Document();
 
   pdf.addPage(
@@ -28,6 +30,8 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context) async 
         children: [
           pw.Text('Customer Details', style: pw.TextStyle(fontSize: 24)),
           pw.SizedBox(height: 20),
+          pw.Text('Rechnung Nr.: $printId', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 16),
           pw.Text('Name: ${data['customerFirstName']}'),
           pw.Text('Phone: ${data['phoneNumber']}'),
           pw.Text('Address: ${data['address']}'),
@@ -67,6 +71,10 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context) async 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("✅ PDF saved as $fileName")),
     );
+
+    // 📂 افتح الملف مباشرة بعد الحفظ
+    await OpenFile.open(file.path);
+
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("❌ Failed to save PDF")),

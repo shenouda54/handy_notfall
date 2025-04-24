@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/print&pdf/generate_pdf.dart';
+import 'package:handy_notfall/data/print_pdf/customer_numbering_screen.dart';
+import 'package:handy_notfall/data/print_pdf/generate_pdf.dart';
 
 class CustomerDetailsScreen extends StatelessWidget {
   final String customerId;
@@ -8,32 +9,57 @@ class CustomerDetailsScreen extends StatelessWidget {
 
   Future<DocumentSnapshot> fetchCustomerDetails() async {
     return await FirebaseFirestore.instance
-        .collection('Customers') //
+        .collection('Customers')
         .doc(customerId)
         .get();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Kundendetails')), //Customer Details
-      body: FutureBuilder<DocumentSnapshot>(
-        future: fetchCustomerDetails(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text("Keine Daten gefunden"));  //No Data Found
-          }
+    return FutureBuilder<DocumentSnapshot>(
+      future: fetchCustomerDetails(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          var data = snapshot.data!.data() as Map<String, dynamic>;
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Scaffold(
+            body: Center(child: Text("Keine Daten gefunden")),
+          );
+        }
 
-          return Padding(
+        var data = snapshot.data!.data() as Map<String, dynamic>;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Kundendetails'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.format_list_numbered),
+                tooltip: 'ترقيم العميل',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CustomerNumberingScreen(
+                        customerName: data['customerFirstName'],
+                        customerPhone: data['phoneNumber'],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
                 detailRow('Name', data['customerFirstName']),
+                detailRow('E-Mail', data['emailAddress']),
                 detailRow('Handynummer', data['phoneNumber']),
                 detailRow('Adresse', data['address']),
                 detailRow('Stadt', data['city']),
@@ -43,23 +69,36 @@ class CustomerDetailsScreen extends StatelessWidget {
                 detailRow('PIN code', data['pinCode']),
                 detailRow('Problem', data['issue']),
                 detailRow('Preis', "${data['price']} €"),
-                detailRow('Startdatum', (data['startDate'] as Timestamp).toDate().toString().split(' ')[0]),
-                detailRow('Enddatum ', (data['endDate'] as Timestamp).toDate().toString().split(' ')[0]),
+                detailRow(
+                  'Startdatum',
+                  (data['startDate'] as Timestamp).toDate().toString().split(' ')[0],
+                ),
+                detailRow(
+                  'Enddatum',
+                  (data['endDate'] as Timestamp).toDate().toString().split(' ')[0],
+                ),
                 detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
                 const SizedBox(height: 20),
-
                 ElevatedButton(
                   onPressed: () async {
-                    await generatePdf(data, context);
+                    if (data.containsKey('printId')) {
+                      final printId = data['printId'];
+                      await generatePdf(data, context, printId);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا."),
+                        ),
+                      );
+                    }
                   },
                   child: const Text('Herunterladen als PDF'),
                 ),
-
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 

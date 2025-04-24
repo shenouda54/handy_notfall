@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/custom_dropdown.dart';
 import 'package:handy_notfall/data/custom_input_field.dart';
 import 'package:handy_notfall/data/customer_service.dart';
 import 'package:handy_notfall/data/date_picker_field.dart';
+import 'package:handy_notfall/data/device_type_selection.dart';
 import 'package:handy_notfall/data/issue_selection.dart';
 import 'package:handy_notfall/models/customer_model.dart';
 import 'package:intl/intl.dart';
@@ -39,8 +39,9 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController customIssueController = TextEditingController();
+  final TextEditingController customDeviceController = TextEditingController();
 
-  String? selectedDeviceType;
+  List<String> selectedDeviceTypes = [];
   final List<String> deviceTypes = [
     'Dell',
     'Apple',
@@ -78,6 +79,13 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Geht nicht an',
     'Datenübertragung',
     'SoftWare',
+    'Neue ',
+    'Gebraucht ',
+    'Panzerglas',
+    'Ladekabel',
+    'Hülle',
+    'Ladegerät',
+    'Nachbesserung',
   ];
 
   String? selectedIssue;
@@ -109,16 +117,24 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // اختيار نوع الجهاز
-              CustomDropdown(
-                label: 'Geräte-Typ *',
-                value: selectedDeviceType,
-                items: deviceTypes,
-                onChanged: (value) {
+              DeviceTypeSelection(
+                deviceTypes: deviceTypes,
+                selectedDeviceTypes: selectedDeviceTypes,
+                onAdd: (value) {
                   setState(() {
-                    selectedDeviceType = value;
+                    if (!selectedDeviceTypes.contains(value)) {
+                      selectedDeviceTypes.add(value);
+                    }
                   });
                 },
+                onRemove: (value) {
+                  setState(() {
+                    selectedDeviceTypes.remove(value);
+                  });
+                },
+                customDeviceController: customDeviceController,
               ),
+
               const SizedBox(height: 16.0),
               CustomInputField(
                   controller: modelController, label: 'Modellnummer *'),
@@ -195,7 +211,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         city: widget.city.trim(),
                         phoneNumber: widget.phoneNumber.trim(),
                         emailAddress: widget.emailAddress.trim(),
-                        deviceType: selectedDeviceType ?? '',
+                        deviceType: selectedDeviceTypes.join(', '),
                         deviceModel: modelController.text.trim(),
                         serialNumber: serialNumberController.text.trim(),
                         pinCode: pinCodeController.text.trim(),
@@ -222,14 +238,15 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       await CustomerService.saveCustomer(model);
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Datei gespeichert!')),
+                        const SnackBar(content: Text('Datei gespeichert!')),
                       );
 
-                      Navigator.pop(context,true);
+                      Navigator.pop(context, true);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Daten konnten nicht gespeichert werden: $e')),
+                        SnackBar(
+                            content: Text(
+                                'Daten konnten nicht gespeichert werden: $e')),
                       );
                     }
                   },
