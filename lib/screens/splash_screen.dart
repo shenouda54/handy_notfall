@@ -15,8 +15,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // تأخير لمدة 4 ثوانٍ قبل الانتقال إلى CustomerScreen
-    Future.delayed(const Duration(seconds: 4), () {
+    // تأخير لمدة 3 ثوانٍ قبل الانتقال إلى CustomerScreen
+    Future.delayed(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

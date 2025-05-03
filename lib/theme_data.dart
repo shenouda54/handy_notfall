@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 final ThemeData handyNotfallTheme = ThemeData(
-  primaryColor: const Color(0xFFE53935), // اللون الأحمر الأساسي
-  scaffoldBackgroundColor: const Color(0xFF000000), // تعيين الخلفية السوداء
+  primaryColor: const Color(0xFFE53935),
+  // اللون الأحمر الأساسي
+  scaffoldBackgroundColor: const Color(0xFF000000),
+  // تعيين الخلفية السوداء
   appBarTheme: const AppBarTheme(
     backgroundColor: Color(0xFF000000), // لون شريط التطبيق
     titleTextStyle: TextStyle(

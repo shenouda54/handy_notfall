@@ -14,13 +14,13 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
-  String? selectedDeviceType;
+  final TextEditingController modelController = TextEditingController();
 
   List<Map<String, dynamic>> customers = [];
   List<Map<String, dynamic>> filteredCustomers = [];
 
-  final TextEditingController modelController = TextEditingController();
-
+  int currentPage = 0;
+  final int itemsPerPage = 10;
 
   @override
   void initState() {
@@ -35,6 +35,7 @@ class _SearchScreenState extends State<SearchScreen> {
         print("❌ لم يتم العثور على المستخدم الحالي!");
         return;
       }
+
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('Customers')
           .where('userEmail', isEqualTo: userEmail)
@@ -61,7 +62,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
       setState(() {
         customers = customerList;
-        filteredCustomers = customers;
+        filteredCustomers = customerList;
+        currentPage = 0;
       });
     } catch (e) {
       print("❌ خطأ في جلب البيانات: $e");
@@ -70,8 +72,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void filterSearch() {
     String query = searchController.text.toLowerCase();
-    String? selectedType = selectedDeviceType;
     String selectedDate = dateController.text.trim();
+    String modelText = modelController.text.toLowerCase();
 
     setState(() {
       filteredCustomers = customers.where((customer) {
@@ -79,18 +81,31 @@ class _SearchScreenState extends State<SearchScreen> {
             customer["firstName"].toLowerCase().contains(query) ||
                 customer["phone"].contains(query);
 
-        bool matchesDeviceText = modelController.text.trim().isEmpty ||
-            customer["deviceType"].toLowerCase().contains(modelController.text.toLowerCase()) ||
-            customer["deviceModel"].toLowerCase().contains(modelController.text.toLowerCase());
+        bool matchesDeviceText = modelText.isEmpty ||
+            customer["deviceType"]
+                .toLowerCase()
+                .contains(modelText) ||
+            customer["deviceModel"]
+                .toLowerCase()
+                .contains(modelText);
 
         bool matchesDate = selectedDate.isEmpty
             ? true
-            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) == selectedDate;
+            : DateFormat('yyyy-MM-dd').format(customer["startDate"]) ==
+            selectedDate;
 
-        return matchesSearch && matchesDate && matchesDeviceText;
+        return matchesSearch && matchesDeviceText && matchesDate;
       }).toList();
-    });
 
+      currentPage = 0;
+    });
+  }
+
+  List<Map<String, dynamic>> getPaginatedItems() {
+    final start = currentPage * itemsPerPage;
+    final end = start + itemsPerPage;
+    return filteredCustomers.sublist(
+        start, end > filteredCustomers.length ? filteredCustomers.length : end);
   }
 
   Future<void> pickDate() async {
@@ -108,13 +123,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final paginatedItems = getPaginatedItems();
+
     return Scaffold(
       appBar: AppBar(title: const Text("Suche Kunden")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Search Field
             TextField(
               controller: searchController,
               decoration: const InputDecoration(
@@ -124,8 +140,6 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: (value) => filterSearch(),
             ),
             const SizedBox(height: 12),
-
-            // Device Type
             TextField(
               controller: modelController,
               decoration: const InputDecoration(
@@ -135,7 +149,6 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: (value) => filterSearch(),
             ),
             const SizedBox(height: 12),
-            // Date Filter
             TextField(
               controller: dateController,
               readOnly: true,
@@ -149,22 +162,43 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Results
             Expanded(
-              child: filteredCustomers.isEmpty
+              child: paginatedItems.isEmpty
                   ? const Center(child: Text("Keine Ergebnisse gefunden"))
                   : ListView.builder(
-                      itemCount: filteredCustomers.length,
-                      itemBuilder: (context, index) {
-                        final customer = filteredCustomers[index];
-                        return Card(
-                            child: CustomerListTile(
-                          customer: customer,
-                          onEdit: fetchCustomers, //  عشان يعمل تحديث مباشرة
-                        ));
-                      },
+                itemCount: paginatedItems.length,
+                itemBuilder: (context, index) {
+                  final customer = paginatedItems[index];
+                  return Card(
+                    child: CustomerListTile(
+                      customer: customer,
+                      onEdit: fetchCustomers,
                     ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: currentPage > 0
+                      ? () => setState(() => currentPage--)
+                      : null,
+                  child: const Text("Zurück"),
+                ),
+                Text(
+                  "Seite ${currentPage + 1} / ${((filteredCustomers.length - 1) / itemsPerPage).ceil() + 1}",
+                ),
+                ElevatedButton(
+                  onPressed: (currentPage + 1) * itemsPerPage <
+                      filteredCustomers.length
+                      ? () => setState(() => currentPage++)
+                      : null,
+                  child: const Text("Weiter"),
+                ),
+              ],
             ),
           ],
         ),

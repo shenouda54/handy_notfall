@@ -24,19 +24,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       // 🔍 تحقق مما إذا كان الإيميل مسجلًا بالفعل
-      List<String> signInMethods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(emailController.text.trim());
+      List<String> signInMethods = await FirebaseAuth.instance
+          .fetchSignInMethodsForEmail(emailController.text.trim());
 
       if (signInMethods.isNotEmpty) {
         // ✖ الإيميل مسجل بالفعل
         setState(() {
           isLoading = false;
-          errorMessage = 'Diese E-Mail-Adresse ist bereits registriert. '; //هذا البريد الإلكتروني مسجل مسبقًا.
+          errorMessage =
+              'Diese E-Mail-Adresse ist bereits registriert. '; //هذا البريد الإلكتروني مسجل مسبقًا.
         });
         return;
       }
 
       // ✅ إنشاء الحساب إذا لم يكن الإيميل مسجلًا
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -81,9 +84,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: _register,
-              child: const Text('Erstelle ein neues Konto'),
-            ),
+                    onPressed: _register,
+                    child: const Text('Erstelle ein neues Konto'),
+                  ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () {
@@ -92,7 +95,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: const Text('Hast du bereits ein Konto? Anmelden'),  //لديك حساب بالفعل؟ تسجيل الدخول
+              child: const Text(
+                  'Hast du bereits ein Konto? Anmelden'), //لديك حساب بالفعل؟ تسجيل الدخول
             ),
           ],
         ),

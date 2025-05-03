@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/print_pdf/generate_pdf.dart';
+import 'package:handy_notfall/data/print_pdf/customer_number/view_model/customer_numbering_logic.dart';
+import 'package:handy_notfall/data/print_pdf/generate_pdf/view_model/pdf_logic.dart';
 
 class CustomerNumberingScreen extends StatefulWidget {
   final String customerName;
@@ -22,83 +22,35 @@ class _CustomerNumberingScreenState extends State<CustomerNumberingScreen> {
   List<Map<String, dynamic>> devices = [];
   int? printId;
 
-  Future<void> assignCustomerNumber() async {
+  @override
+  void initState() {
+    super.initState();
+    assignNumber();
+  }
+
+  Future<void> assignNumber() async {
     setState(() {
       isProcessing = true;
       result = "";
       devices.clear();
     });
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('Customers')
-        .where('customerFirstName', isEqualTo: widget.customerName)
-        .where('phoneNumber', isEqualTo: widget.customerPhone)
-        .get();
-
-    if (snapshot.docs.isEmpty) {
-      setState(() {
-        isProcessing = false;
-        result = "❌ لا توجد أجهزة لهذا العميل.";
-      });
-      return;
-    }
-
-    // Check if already has printId
-    final existingPrintId = snapshot.docs.first.data()['printId'];
-    if (existingPrintId != null) {
-      devices = snapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
-
-      setState(() {
-        printId = existingPrintId;
-        isProcessing = false;
-        result = "ℹ️ العميل بالفعل مرقّم برقم $printId";
-      });
-      return;
-    }
-
-    // Generate new printId
-    final last = await FirebaseFirestore.instance
-        .collection('Customers')
-        .orderBy('printId', descending: true)
-        .limit(1)
-        .get();
-
-    int newPrintId = 2025501;
-    if (last.docs.isNotEmpty && last.docs.first.data().containsKey('printId')) {
-      newPrintId = last.docs.first['printId'] + 1;
-    }
-
-    for (final doc in snapshot.docs) {
-      await doc.reference.update({'printId': newPrintId});
-    }
-
-    devices = snapshot.docs.map((doc) {
-      final data = doc.data();
-      data['id'] = doc.id;
-      return data;
-    }).toList();
+    final response = await CustomerNumberingService.assignCustomerNumber(widget.customerName, widget.customerPhone);
 
     setState(() {
-      printId = newPrintId;
       isProcessing = false;
-      result = "✅ تم ترقيم العميل برقم $newPrintId";
+      result = response["message"];
+      if (response["success"]) {
+        devices = response["devices"];
+        printId = response["printId"];
+      }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    assignCustomerNumber();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("أجهزة ${widget.customerName}")),
+      appBar: AppBar(title: Text("Geräte : ${widget.customerName}")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isProcessing

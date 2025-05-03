@@ -40,9 +40,25 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   ];
 
   final List<String> issueOptions = [
-    'Display ', 'Akku ', 'Kamera ', 'Kameraglas ', 'Hörmuschel ',
-    'Ladebuchse  ', 'Lautsprecher ', 'Rückseite ', 'Wasserschaden',
-    'Geht nicht an', 'Datenübertragung', 'SoftWare'
+    'Display ',
+    'Akku ',
+    'Kamera ',
+    'Kameraglas ',
+    'Hörmuschel ',
+    'Ladebuchse  ',
+    'Lautsprecher ',
+    'Rückseite ',
+    'Wasserschaden',
+    'Geht nicht an',
+    'Datenübertragung',
+    'SoftWare',
+    'Neue ',
+    'Gebraucht ',
+    'Panzerglas',
+    'Ladekabel',
+    'Hülle',
+    'Ladegerät',
+    'Nachbesserung',
   ];
 
   @override
@@ -159,7 +175,6 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                 },
               ),
               const SizedBox(height: 12),
-
               CustomInputField(
                 controller: repairPriceController,
                 label: ' Reparatur Preis ',
@@ -170,7 +185,6 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               DatePickerField(controller: startDateController, label: ' Anfang'),
               const SizedBox(height: 12),
               DatePickerField(controller: endDateController, label: 'Abholung '),
-
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _updateCustomer,

@@ -25,11 +25,15 @@ class IssueSelection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Fehler', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Fehler',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(border: OutlineInputBorder(), labelText: 'Problem wählen'),
-              items: issueOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(), labelText: 'Problem wählen'),
+              items: issueOptions
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
               onChanged: (val) {
                 if (val != null) onAddIssue(val);
               },
@@ -37,10 +41,12 @@ class IssueSelection extends StatelessWidget {
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
-              children: selectedIssues.map((issue) => Chip(
-                label: Text(issue),
-                onDeleted: () => onRemoveIssue(issue),
-              )).toList(),
+              children: selectedIssues
+                  .map((issue) => Chip(
+                        label: Text(issue),
+                        onDeleted: () => onRemoveIssue(issue),
+                      ))
+                  .toList(),
             ),
             const SizedBox(height: 10),
             TextFormField(

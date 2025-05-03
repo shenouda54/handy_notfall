@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/firebase_options.dart';
 import 'package:handy_notfall/login/login.dart';
-import 'package:handy_notfall/screens/data_of_custmer_screen.dart';
+import 'package:handy_notfall/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding
@@ -11,7 +11,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
             ); // شاشة تحميل أثناء التحقق من حالة المستخدم
           }
           if (snapshot.hasData) {
-            return const CustomerScreen(); // المستخدم مسجل دخول
+            return const SplashScreen(); // المستخدم مسجل دخول
           }
           return const LoginScreen(); // المستخدم غير مسجل دخول
         },

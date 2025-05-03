@@ -16,7 +16,7 @@ class DataTelponeScreen extends StatefulWidget {
   final String phoneNumber;
   final String emailAddress;
 
-  const DataTelponeScreen({
+  const DataTelponeScreen  ({
     Key? key,
     required this.firstName,
     required this.address,

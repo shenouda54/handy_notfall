@@ -17,6 +17,7 @@ class CustomerModel {
   Timestamp endDate;
   bool isDone;
   String userEmail;
+  int? printId; // ✅ أضفنا printId
 
   CustomerModel({
     this.id = '',
@@ -32,6 +33,7 @@ class CustomerModel {
     required this.pinCode,
     required this.price,
     required this.userEmail,
+    this.printId, // ✅ هنا
     Timestamp? startDate,
     Timestamp? endDate,
     this.isDone = false,
@@ -52,10 +54,11 @@ class CustomerModel {
       serialNumber: json['serialNumber'],
       pinCode: json['pinCode'],
       price: json['price'],
+      userEmail: json['userEmail'] ?? '',
       startDate: json['startDate'] != null ? json['startDate'] as Timestamp : Timestamp.now(),
       endDate: json['endDate'] != null ? json['endDate'] as Timestamp : Timestamp.now(),
       isDone: json['isDone'] ?? false,
-      userEmail: json['userEmail'] ?? '',
+      printId: json['printId'], // ✅ ناخده كمان من الفايرستور
     );
   }
 
@@ -77,6 +80,7 @@ class CustomerModel {
       "endDate": endDate,
       "isDone": isDone,
       "userEmail": userEmail,
+      "printId": printId, // ✅ نحفظه مع البيانات
     };
   }
 }

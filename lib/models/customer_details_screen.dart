@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/print_pdf/customer_numbering_screen.dart';
-import 'package:handy_notfall/data/print_pdf/generate_pdf.dart';
+import 'package:handy_notfall/data/print_pdf/customer_number/view/customer_numbering_screen.dart';
+import 'package:handy_notfall/data/print_pdf/generate_pdf/view_model/pdf_logic.dart';
 
 class CustomerDetailsScreen extends StatelessWidget {
   final String customerId;

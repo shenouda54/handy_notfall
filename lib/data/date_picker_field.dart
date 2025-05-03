@@ -5,7 +5,8 @@ class DatePickerField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
 
-  const DatePickerField({super.key, required this.controller, required this.label});
+  const DatePickerField(
+      {super.key, required this.controller, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,8 @@ class DatePickerField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         readOnly: true,
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+        decoration: InputDecoration(
+            labelText: label, border: const OutlineInputBorder()),
         onTap: () async {
           DateTime? picked = await showDatePicker(
             context: context,

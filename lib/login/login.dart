@@ -23,8 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -37,11 +37,12 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = false;
         if (e.code == 'user-not-found') {
-          errorMessage = 'Es gibt kein Konto mit dieser E-MailAdresse.';   // لا يوجد حساب بهذا البريد الإلكتروني.
+          errorMessage =
+              'Es gibt kein Konto mit dieser E-MailAdresse.'; // لا يوجد حساب بهذا البريد الإلكتروني.
         } else if (e.code == 'wrong-password') {
-          errorMessage = 'Das Passwort ist falsch. ';//كلمة المرور غير صحيحة.
+          errorMessage = 'Das Passwort ist falsch. '; //كلمة المرور غير صحيحة.
         } else {
-          errorMessage = ' Ein Fehler ist aufgetreten: ${e.message}';  //حدث خطأ:
+          errorMessage = ' Ein Fehler ist aufgetreten: ${e.message}'; //حدث خطأ:
         }
       });
     }
@@ -58,13 +59,15 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'E-Mail'), //البريد الإلكتروني
+              decoration: const InputDecoration(labelText: 'E-Mail'),
+              //البريد الإلكتروني
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Passwort'),//كلمة المرور
+              decoration: const InputDecoration(labelText: 'Passwort'),
+              //كلمة المرور
               obscureText: true,
             ),
             const SizedBox(height: 16),
@@ -74,19 +77,21 @@ class _LoginScreenState extends State<LoginScreen> {
             isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: _login,
-              child: const Text(' Anmelden'),
-            ),
+                    onPressed: _login,
+                    child: const Text(' Anmelden'),
+                  ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
-
-                  MaterialPageRoute(builder: (context) => const RegisterScreen(),),
+                  MaterialPageRoute(
+                    builder: (context) => const RegisterScreen(),
+                  ),
                 );
               },
-              child: const Text('Hast du kein Konto? Erstell dir ein neues'), //ليس لديك حساب؟ أنشئ حساب جديد
+              child: const Text(
+                  'Hast du kein Konto? Erstell dir ein neues'), //ليس لديك حساب؟ أنشئ حساب جديد
             ),
           ],
         ),

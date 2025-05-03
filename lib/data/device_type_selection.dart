@@ -25,7 +25,8 @@ class DeviceTypeSelection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Gerätetyp', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Gerätetyp',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
