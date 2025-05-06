@@ -82,17 +82,13 @@ class _SearchScreenState extends State<SearchScreen> {
                 customer["phone"].contains(query);
 
         bool matchesDeviceText = modelText.isEmpty ||
-            customer["deviceType"]
-                .toLowerCase()
-                .contains(modelText) ||
-            customer["deviceModel"]
-                .toLowerCase()
-                .contains(modelText);
+            customer["deviceType"].toLowerCase().contains(modelText) ||
+            customer["deviceModel"].toLowerCase().contains(modelText);
 
         bool matchesDate = selectedDate.isEmpty
             ? true
             : DateFormat('yyyy-MM-dd').format(customer["startDate"]) ==
-            selectedDate;
+                selectedDate;
 
         return matchesSearch && matchesDeviceText && matchesDate;
       }).toList();
@@ -155,9 +151,25 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: InputDecoration(
                 labelText: "Filtern nach Startdatum",
                 border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.calendar_today),
-                  onPressed: pickDate,
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (dateController.text.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            dateController.clear();
+                            filteredCustomers = customers;
+                            currentPage = 0;
+                          });
+                        },
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: pickDate,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -166,17 +178,17 @@ class _SearchScreenState extends State<SearchScreen> {
               child: paginatedItems.isEmpty
                   ? const Center(child: Text("Keine Ergebnisse gefunden"))
                   : ListView.builder(
-                itemCount: paginatedItems.length,
-                itemBuilder: (context, index) {
-                  final customer = paginatedItems[index];
-                  return Card(
-                    child: CustomerListTile(
-                      customer: customer,
-                      onEdit: fetchCustomers,
+                      itemCount: paginatedItems.length,
+                      itemBuilder: (context, index) {
+                        final customer = paginatedItems[index];
+                        return Card(
+                          child: CustomerListTile(
+                            customer: customer,
+                            onEdit: fetchCustomers,
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -193,7 +205,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
                 ElevatedButton(
                   onPressed: (currentPage + 1) * itemsPerPage <
-                      filteredCustomers.length
+                          filteredCustomers.length
                       ? () => setState(() => currentPage++)
                       : null,
                   child: const Text("Weiter"),

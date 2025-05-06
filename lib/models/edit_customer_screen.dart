@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:handy_notfall/data/custom_dropdown.dart';
 import 'package:handy_notfall/data/custom_input_field.dart';
 import 'package:handy_notfall/data/date_picker_field.dart';
 import 'package:handy_notfall/data/issue_selection.dart';
+import 'package:handy_notfall/data/device_type_selection.dart';
 import 'package:intl/intl.dart';
 
 class EditCustomerScreen extends StatefulWidget {
@@ -24,13 +24,14 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController customIssueController = TextEditingController();
+  final TextEditingController customDeviceController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
-  String? selectedDeviceType;
+  List<String> selectedDeviceTypes = [];
   List<String> selectedIssues = [];
 
   final List<String> deviceTypes = [
@@ -40,25 +41,10 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   ];
 
   final List<String> issueOptions = [
-    'Display ',
-    'Akku ',
-    'Kamera ',
-    'Kameraglas ',
-    'Hörmuschel ',
-    'Ladebuchse  ',
-    'Lautsprecher ',
-    'Rückseite ',
-    'Wasserschaden',
-    'Geht nicht an',
-    'Datenübertragung',
-    'SoftWare',
-    'Neue ',
-    'Gebraucht ',
-    'Panzerglas',
-    'Ladekabel',
-    'Hülle',
-    'Ladegerät',
-    'Nachbesserung',
+    'Display ', 'Akku ', 'Kamera ', 'Kameraglas ', 'Hörmuschel ',
+    'Ladebuchse  ', 'Lautsprecher ', 'Rückseite ', 'Wasserschaden',
+    'Geht nicht an', 'Datenübertragung', 'SoftWare', 'Neue ', 'Gebraucht ',
+    'Panzerglas', 'Ladekabel', 'Hülle', 'Ladegerät', 'Nachbesserung',
   ];
 
   @override
@@ -86,40 +72,72 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
       serialNumberController.text = data['serialNumber'] ?? '';
       pinCodeController.text = data['pinCode'] ?? '';
       repairPriceController.text = data['price'].toString();
-      selectedDeviceType = data['deviceType'] ?? '';
-      selectedIssues = (data['issue'] as String).split(', ').where((e) => e.isNotEmpty).toList();
-      startDateController.text = DateFormat('yyyy-MM-dd').format((data['startDate'] as Timestamp).toDate());
-      endDateController.text = DateFormat('yyyy-MM-dd').format((data['endDate'] as Timestamp).toDate());
+      selectedDeviceTypes = (data['deviceType'] as String)
+          .split(', ')
+          .where((e) => e.isNotEmpty)
+          .toList();
+      selectedIssues = (data['issue'] as String)
+          .split(', ')
+          .where((e) => e.isNotEmpty)
+          .toList();
+      startDateController.text = DateFormat('yyyy-MM-dd')
+          .format((data['startDate'] as Timestamp).toDate());
+      endDateController.text = DateFormat('yyyy-MM-dd')
+          .format((data['endDate'] as Timestamp).toDate());
     });
   }
 
   Future<void> _updateCustomer() async {
-    if (!_formKey.currentState!.validate()) return;
+    debugPrint("Starting update process...");
 
-    await FirebaseFirestore.instance
-        .collection('Customers')
-        .doc(widget.customerId)
-        .update({
-      'customerFirstName': firstNameController.text.trim(),
-      'address': addressController.text.trim(),
-      'city': cityController.text.trim(),
-      'phoneNumber': phoneController.text.trim(),
-      'emailAddress': emailController.text.trim(),
-      'deviceType': selectedDeviceType ?? '',
-      'deviceModel': modelController.text.trim(),
-      'serialNumber': serialNumberController.text.trim(),
-      'pinCode': pinCodeController.text.trim(),
-      'issue': selectedIssues.join(', '),
-      'price': int.tryParse(repairPriceController.text.trim()) ?? 0,
-      'startDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text)),
-      'endDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(endDateController.text)),
-    });
+    if (!_formKey.currentState!.validate()) {
+      debugPrint("Form is not valid.");
+      return;
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Die Daten wurden erfolgreich geändert.')),
-    );
-    Navigator.pop(context, true);
+    try {
+      await FirebaseFirestore.instance
+          .collection('Customers')
+          .doc(widget.customerId)
+          .update({
+        'customerFirstName': firstNameController.text.trim(),
+        'address': addressController.text.trim(),
+        'city': cityController.text.trim(),
+        'phoneNumber': phoneController.text.trim(),
+        'emailAddress': emailController.text.trim(),
+        'deviceType': selectedDeviceTypes.join(', '),
+        'deviceModel': modelController.text.trim(),
+        'serialNumber': serialNumberController.text.trim(),
+        'pinCode': pinCodeController.text.trim(),
+        'issue': selectedIssues.join(', '),
+        'price': int.tryParse(repairPriceController.text.trim()) ?? 0,
+        'startDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text)),
+        'endDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(endDateController.text)),
+      });
+
+      debugPrint("Update successful, showing snackbar...");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Die Daten wurden erfolgreich geändert.'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (mounted) {
+        debugPrint("Popping context...");
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      debugPrint("Error during update: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehler beim Speichern: $e')),
+      );
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -141,15 +159,22 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               const SizedBox(height: 12),
               CustomInputField(controller: emailController, label: "E-Mail des Empfängers "),
               const SizedBox(height: 12),
-
-              CustomDropdown(
-
-                label: 'Geräte-Typ  ',
-                value: selectedDeviceType,
-                items: deviceTypes,
-                onChanged: (value) {
-                  setState(() => selectedDeviceType = value);
+              DeviceTypeSelection(
+                deviceTypes: deviceTypes,
+                selectedDeviceTypes: selectedDeviceTypes,
+                onAdd: (value) {
+                  setState(() {
+                    if (!selectedDeviceTypes.contains(value)) {
+                      selectedDeviceTypes.add(value);
+                    }
+                  });
                 },
+                onRemove: (value) {
+                  setState(() {
+                    selectedDeviceTypes.remove(value);
+                  });
+                },
+                customDeviceController: customDeviceController,
               ),
               const SizedBox(height: 12),
               CustomInputField(controller: modelController, label: "Modellnummer "),
@@ -158,7 +183,6 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               const SizedBox(height: 12),
               CustomInputField(controller: pinCodeController, label: "Speer/Pin Code"),
               const SizedBox(height: 12),
-
               IssueSelection(
                 issueOptions: issueOptions,
                 selectedIssues: selectedIssues,
@@ -178,7 +202,6 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               CustomInputField(
                 controller: repairPriceController,
                 label: ' Reparatur Preis ',
-
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 12),

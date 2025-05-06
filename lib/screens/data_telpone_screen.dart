@@ -16,7 +16,7 @@ class DataTelponeScreen extends StatefulWidget {
   final String phoneNumber;
   final String emailAddress;
 
-  const DataTelponeScreen  ({
+  const DataTelponeScreen({
     Key? key,
     required this.firstName,
     required this.address,
@@ -43,53 +43,30 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
 
   List<String> selectedDeviceTypes = [];
   final List<String> deviceTypes = [
-    'Dell',
-    'Apple',
-    'Samsung',
-    'HP',
-    'Lenovo',
-    'Sony',
-    'LG',
-    'Huawei',
-    'Toshiba',
-    'Asus',
-    'Acer',
-    'Microsoft',
-    'Realme',
-    'HTC',
-    'Motorola',
-    'Blackberry',
-    'Xiaomi',
-    'Caterpillar',
-    'Oppo',
-    'Google',
-    'Oneplus',
+    'Dell', 'Apple', 'Samsung', 'HP', 'Lenovo', 'Sony', 'LG', 'Huawei',
+    'Toshiba', 'Asus', 'Acer', 'Microsoft', 'Realme', 'HTC', 'Motorola',
+    'Blackberry', 'Xiaomi', 'Caterpillar', 'Oppo', 'Google', 'Oneplus',
   ];
 
   final List<String> issueOptions = [
-    'Display ',
-    'Akku ',
-    'Kamera ',
-    'Kameraglas ',
-    'Hörmuschel ',
-    'Ladebuchse  ',
-    'Lautsprecher ',
-    'Rückseite ',
-    'Wasserschaden',
-    'Geht nicht an',
-    'Datenübertragung',
-    'SoftWare',
-    'Neue ',
-    'Gebraucht ',
-    'Panzerglas',
-    'Ladekabel',
-    'Hülle',
-    'Ladegerät',
-    'Nachbesserung',
+    'Display ', 'Akku ', 'Kamera ', 'Kameraglas ', 'Hörmuschel ',
+    'Ladebuchse  ', 'Lautsprecher ', 'Rückseite ', 'Wasserschaden',
+    'Geht nicht an', 'Datenübertragung', 'SoftWare', 'Neue ', 'Gebraucht ',
+    'Panzerglas', 'Ladekabel', 'Hülle', 'Ladegerät', 'Nachbesserung',
   ];
 
-  String? selectedIssue;
   final List<String> selectedIssues = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -106,17 +83,18 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(' Daten '),
+        title: const Text('Daten'),
         backgroundColor: Colors.blue,
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // اختيار نوع الجهاز
               DeviceTypeSelection(
                 deviceTypes: deviceTypes,
                 selectedDeviceTypes: selectedDeviceTypes,
@@ -134,18 +112,13 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                 },
                 customDeviceController: customDeviceController,
               ),
-
               const SizedBox(height: 16.0),
-              CustomInputField(
-                  controller: modelController, label: 'Modellnummer *'),
+              CustomInputField(controller: modelController, label: 'Modellnummer *'),
               const SizedBox(height: 16.0),
-              CustomInputField(
-                  controller: serialNumberController, label: 'Seriennummer *'),
+              CustomInputField(controller: serialNumberController, label: 'Seriennummer *'),
               const SizedBox(height: 16.0),
-              CustomInputField(
-                  controller: pinCodeController, label: ' Speer/Pin Code *'),
+              CustomInputField(controller: pinCodeController, label: 'Speer/Pin Code *'),
               const SizedBox(height: 16.0),
-              // تحديد واضافه عطل الي هي card
               IssueSelection(
                 issueOptions: issueOptions,
                 selectedIssues: selectedIssues,
@@ -162,45 +135,30 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                 },
               ),
               const SizedBox(height: 16.0),
-
-              // سعر التصليح
               CustomInputField(
                 controller: repairPriceController,
                 label: 'Reparatur Preis *',
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16.0),
-              // تاريخ البداية
-              DatePickerField(
-                  controller: startDateController, label: 'Anfang *'),
-
+              DatePickerField(controller: startDateController, label: 'Anfang *'),
               const SizedBox(height: 16.0),
-
-              // تاريخ النهاية
-              DatePickerField(
-                controller: endDateController,
-                label: 'Abholung *',
-              ),
+              DatePickerField(controller: endDateController, label: 'Abholung *'),
               const SizedBox(height: 20.0),
-              // زر الحفظ
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32.0, vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
                   onPressed: () async {
-                    String? userEmail =
-                        FirebaseAuth.instance.currentUser?.email;
+                    String? userEmail = FirebaseAuth.instance.currentUser?.email;
                     if (userEmail == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                                ' Sie müssen sich zuerst anmelden! ')), //يجب تسجيل الدخول أولاً!
+                        const SnackBar(content: Text('Sie müssen sich zuerst anmelden!')),
                       );
                       return;
                     }
@@ -215,24 +173,16 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         deviceModel: modelController.text.trim(),
                         serialNumber: serialNumberController.text.trim(),
                         pinCode: pinCodeController.text.trim(),
-                        issue: selectedIssues.isNotEmpty
-                            ? selectedIssues.join(', ')
-                            : 'No Issues',
-                        // إذا لم يحدد مشاكل
-                        price:
-                            int.tryParse(repairPriceController.text.trim()) ??
-                                0,
+                        issue: selectedIssues.isNotEmpty ? selectedIssues.join(', ') : 'No Issues',
+                        price: int.tryParse(repairPriceController.text.trim()) ?? 0,
                         startDate: startDateController.text.isNotEmpty
-                            ? Timestamp.fromDate(DateFormat('yyyy-MM-dd')
-                                .parse(startDateController.text.trim()))
+                            ? Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text.trim()))
                             : Timestamp.now(),
                         endDate: endDateController.text.isNotEmpty
-                            ? Timestamp.fromDate(DateFormat('yyyy-MM-dd')
-                                .parse(endDateController.text.trim()))
+                            ? Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(endDateController.text.trim()))
                             : Timestamp.now(),
                         isDone: false,
-                        userEmail:
-                            userEmail, // ✅ احفظ البريد الإلكتروني مع البيانات
+                        userEmail: userEmail,
                       );
 
                       await CustomerService.saveCustomer(model);
@@ -244,19 +194,13 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       Navigator.pop(context, true);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(
-                                'Daten konnten nicht gespeichert werden: $e')),
+                        SnackBar(content: Text('Daten konnten nicht gespeichert werden: $e')),
                       );
                     }
                   },
                   child: const Text(
                     'Speicher Daten',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
               ),
