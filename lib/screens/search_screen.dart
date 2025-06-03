@@ -103,7 +103,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return filteredCustomers.sublist(
         start, end > filteredCustomers.length ? filteredCustomers.length : end);
   }
-
+  //TODO: class new any were
   Future<void> pickDate() async {
     DateTime? picked = await showDatePicker(
       context: context,
