@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
-
-import 'data_of_custmer_screen.dart';
+import '../logic/splash_logic.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,19 +9,12 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final SplashLogic _logic = SplashLogic();
+
   @override
   void initState() {
     super.initState();
-
-    // تأخير لمدة 3 ثوانٍ قبل الانتقال إلى CustomerScreen
-    Future.delayed(const Duration(seconds: 5), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const CustomerScreen(),
-        ),
-      );
-    });
+    _logic.handleNavigation(context);
   }
 
   @override

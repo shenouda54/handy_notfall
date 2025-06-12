@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:handy_notfall/login/signup.dart';
-import 'package:handy_notfall/screens/data_of_custmer_screen.dart';
+import 'package:handy_notfall/features/auth/presentation/login/signup.dart';
+
+import '../../../presentation/pages/customer_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

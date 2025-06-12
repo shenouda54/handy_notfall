@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/models/customer_details_screen.dart';
-import 'package:handy_notfall/models/edit_customer_screen.dart';
-import 'package:handy_notfall/screens/data_telpone_screen.dart';
+import 'package:handy_notfall/features/presentation/pages/edit_customer_screen.dart';
+
+import '../features/presentation/pages/data_telpone_screen.dart';
 
 class CustomerListTile extends StatelessWidget {
   final Map<String, dynamic> customer;

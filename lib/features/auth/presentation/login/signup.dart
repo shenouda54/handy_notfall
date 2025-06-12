@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:handy_notfall/login/login.dart';
-import 'package:handy_notfall/screens/data_of_custmer_screen.dart';
+
+import '../../../presentation/pages/customer_screen.dart';
+import 'login.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

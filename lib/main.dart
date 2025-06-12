@@ -1,40 +1,45 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:handy_notfall/firebase_options.dart';
-import 'package:handy_notfall/login/login.dart';
-import 'package:handy_notfall/screens/splash_screen.dart';
+import 'package:flutter/cupertino.dart';
 
-void main() async {
-  WidgetsFlutterBinding
-      .ensureInitialized(); // لو مش موجود السطر دا هيجري علي run app علطول
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const MyApp());
+import 'features/auth/presentation/login/login.dart';
+import 'features/presentation/pages/customer_screen.dart';
+import 'features/splash/presentation/splash_screen.dart';
+
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _AuthGateState extends State<AuthGate> {
+  bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ); // شاشة تحميل أثناء التحقق من حالة المستخدم
-          }
-          if (snapshot.hasData) {
-            return const SplashScreen(); // المستخدم مسجل دخول
-          }
-          return const LoginScreen(); // المستخدم غير مسجل دخول
-        },
-      ),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting || _showSplash) {
+          return const SplashScreen(); // ✅ عرض Splash مؤقتًا
+        }
+        if (snapshot.hasData) {
+          return const CustomerScreen(); // ✅ بعد السبلاتش يروح هنا
+        }
+        return const LoginScreen(); // ❌ مش مسجل دخول
+      },
     );
   }
 }

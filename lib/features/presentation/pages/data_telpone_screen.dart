@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/custom_input_field.dart';
-import 'package:handy_notfall/data/customer_service.dart';
 import 'package:handy_notfall/data/date_picker_field.dart';
 import 'package:handy_notfall/data/device_type_selection.dart';
 import 'package:handy_notfall/data/issue_selection.dart';
-import 'package:handy_notfall/models/customer_model.dart';
+import 'package:handy_notfall/features/domain/usecases/save_customer_data_usecase.dart';
 import 'package:intl/intl.dart';
+
+import '../../domain/entities/customer_data_telpone_entity.dart';
 
 class DataTelponeScreen extends StatefulWidget {
   final String firstName;
@@ -163,7 +164,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       return;
                     }
                     try {
-                      CustomerModel model = CustomerModel(
+                      final entity = CustomerDataEntity(
                         customerFirstName: widget.firstName.trim(),
                         address: widget.address.trim(),
                         city: widget.city.trim(),
@@ -173,7 +174,9 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         deviceModel: modelController.text.trim(),
                         serialNumber: serialNumberController.text.trim(),
                         pinCode: pinCodeController.text.trim(),
-                        issue: selectedIssues.isNotEmpty ? selectedIssues.join(', ') : 'No Issues',
+                        issue: selectedIssues.isNotEmpty
+                            ? selectedIssues.join(', ')
+                            : 'No Issues',
                         price: int.tryParse(repairPriceController.text.trim()) ?? 0,
                         startDate: startDateController.text.isNotEmpty
                             ? Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text.trim()))
@@ -185,7 +188,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         userEmail: userEmail,
                       );
 
-                      await CustomerService.saveCustomer(model);
+                      await SaveCustomerDataUseCase().execute(entity);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Datei gespeichert!')),
