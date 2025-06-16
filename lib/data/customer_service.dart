@@ -30,7 +30,7 @@ class CustomerService {
           .limit(1)
           .get();
 
-      int newPrintId = 2025501;
+      int newPrintId = 2025670;
       if (last.docs.isNotEmpty && last.docs.first.data().containsKey('printId')) {
         newPrintId = last.docs.first['printId'] + 1;
       }

@@ -8,9 +8,9 @@ class CustomerNumberingService {
       return {"success": false, "message": "❌ Sie sind nicht eingeloggt.", "devices": []};
     }
 
-    if (userEmail != "handynotfall@web.de") {
-      return {"success": false, "message": "Sie können diese Funktion nicht verwenden. ❌", "devices": []};
-    }
+    // if (userEmail != "handynotfall@web.de") {
+    //   return {"success": false, "message": "Sie können diese Funktion nicht verwenden. ❌", "devices": []};
+    // }
 
     final snapshot = await FirebaseFirestore.instance
         .collection('Customers')

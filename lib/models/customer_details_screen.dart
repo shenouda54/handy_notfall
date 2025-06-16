@@ -101,7 +101,6 @@ class CustomerDetailsScreen extends StatelessWidget {
       },
     );
   }
-
   Widget detailRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

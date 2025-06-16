@@ -103,6 +103,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return filteredCustomers.sublist(
         start, end > filteredCustomers.length ? filteredCustomers.length : end);
   }
+
   //TODO: class new any were
   Future<void> pickDate() async {
     DateTime? picked = await showDatePicker(
@@ -119,6 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    filteredCustomers.sort((a, b) => b["startDate"].compareTo(a["startDate"]));
     final paginatedItems = getPaginatedItems();
 
     return Scaffold(

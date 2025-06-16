@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/print_pdf/customer_number/view_model/customer_numbering_logic.dart';
 import 'package:handy_notfall/data/print_pdf/generate_pdf/view_model/pdf_logic.dart';
 
+import '../../../delete_customer_button.dart';
+
 class CustomerNumberingScreen extends StatefulWidget {
   final String customerName;
   final String customerPhone;
@@ -50,7 +52,16 @@ class _CustomerNumberingScreenState extends State<CustomerNumberingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Geräte : ${widget.customerName}")),
+      appBar: AppBar(title: Text("Geräte : ${widget.customerName}"),
+      actions: [
+        DeleteCustomerButton(
+          customerName: widget.customerName,
+          customerPhone: widget.customerPhone,
+          onDeleted: () {
+            Navigator.pop(context); // ✅ نرجع للششاشة اللي قبل بعد الحذف
+          },
+        ),
+      ],),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isProcessing

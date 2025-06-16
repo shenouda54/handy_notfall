@@ -14,9 +14,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _logic.handleNavigation(context);
+    _logic.handleNavigation(this);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

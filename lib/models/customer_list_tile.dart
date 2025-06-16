@@ -42,15 +42,15 @@ class CustomerListTile extends StatelessWidget {
                     ),
                   ),
                 );
-    if (result == true) {
-    if (onEdit != null) onEdit!();
-              }
+                if (result == true && onEdit != null) {
+                  onEdit!(); // ✅ تحديث الشاشة بعد الإضافة
+                }
               }
             ),
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async{
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditCustomerScreen(
@@ -58,6 +58,9 @@ class CustomerListTile extends StatelessWidget {
                     ),
                   ),
                 );
+                if (result == true && onEdit != null) {
+                  onEdit!(); // ✅ تحديث الشاشة بعد التعديل
+                }
               },
             ),
             IconButton(
