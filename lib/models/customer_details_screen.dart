@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/print_pdf/customer_number/view/customer_numbering_screen.dart';
-import 'package:handy_notfall/data/print_pdf/generate_pdf/view_model/pdf_logic.dart';
+
+import '../data/screen_pdfs/kostenmittlung/view/kostenmittlung_screen.dart';
+import '../data/screen_pdfs/rechnung/view/rechnung_screen.dart';
+import '../data/screen_pdfs/rechnung/view_model/pdf_logic.dart';
+import '../data/screen_pdfs/rechnung_handy/rechnung_handy_screen.dart';
+import '../data/screen_pdfs/rechnungs_verkaufe/rechnungs_verkaufe_screen.dart';
 
 class CustomerDetailsScreen extends StatelessWidget {
   final String customerId;
+
   const CustomerDetailsScreen({super.key, required this.customerId});
 
   Future<DocumentSnapshot> fetchCustomerDetails() async {
@@ -71,29 +77,67 @@ class CustomerDetailsScreen extends StatelessWidget {
                 detailRow('Preis', "${data['price']} €"),
                 detailRow(
                   'Startdatum',
-                  (data['startDate'] as Timestamp).toDate().toString().split(' ')[0],
+                  (data['startDate'] as Timestamp)
+                      .toDate()
+                      .toString()
+                      .split(' ')[0],
                 ),
                 detailRow(
                   'Enddatum',
-                  (data['endDate'] as Timestamp).toDate().toString().split(' ')[0],
+                  (data['endDate'] as Timestamp)
+                      .toDate()
+                      .toString()
+                      .split(' ')[0],
                 ),
                 detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (data.containsKey('printId')) {
-                      final printId = data['printId'];
-                      await generatePdf(data, context, printId);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا."),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Herunterladen als PDF'),
-                ),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: [
+                    {
+                      'label': 'Rechnung',
+                      'screen': (String id, int pid) => RechnungScreen(customerId: id, printId: pid),
+                    },
+                    {
+                      'label': 'Rechnung verkaufe',
+                      'screen': (String id, int pid) => RechnungVerkaufeScreen(customerId: id, printId: pid),
+                    },
+                    {
+                      'label': 'Rechnung Handy',
+                      'screen': (String id, int pid) => RechnungHandyScreen(customerId: id, printId: pid),
+                    },
+                    {
+                      'label': 'Kostenmittlung',
+                      'screen': (String id, int pid) => KostenmittlungScreen(customerId: id, printId: pid),
+                    },
+                  ].map((item) {
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width / 2 - 24,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (data.containsKey('printId')) {
+                            final printId = data['printId'];
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => (item['screen'] as Widget Function(String, int))(customerId, printId),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا."),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(item['label'] as String),
+                      ),
+                    );
+                  }).toList(),
+                )
+
               ],
             ),
           ),
@@ -101,6 +145,7 @@ class CustomerDetailsScreen extends StatelessWidget {
       },
     );
   }
+
   Widget detailRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

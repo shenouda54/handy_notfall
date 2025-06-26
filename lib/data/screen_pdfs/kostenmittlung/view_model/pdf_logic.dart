@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/print_pdf/generate_pdf/view/pdf_ui_builder.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
+import '../view/pdf_ui_kostenmittlung.dart' show buildPdfContent;
+
 
 Future<bool> requestStoragePermission() async {
   if (Platform.isAndroid) {
@@ -16,13 +17,14 @@ Future<bool> requestStoragePermission() async {
   return true;
 }
 
-Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, int printId) async {
+Future<void> generatePdf(
+    Map<String, dynamic> data, BuildContext context, int printId) async {
   final pdf = pw.Document();
   final pdfPageContent = await buildPdfContent(data, printId);
 
   pdf.addPage(
     pw.Page(
-      build: (context) => pdfPageContent, // 👈 هنا التصميم الخارجي
+      build: (context) => pdfPageContent,
     ),
   );
 
@@ -36,19 +38,20 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, int pr
 
   final directory = Directory('/storage/emulated/0/Download');
   final now = DateTime.now();
-  final fileName = 'customer_details_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}.pdf';
+  final fileName =
+      'kostenmittlung_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}.pdf';
   final file = File('${directory.path}/$fileName');
 
   await file.writeAsBytes(await pdf.save());
 
   if (await file.exists()) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("✅ PDF saved as $fileName")),
+      SnackBar(content: Text("✅ PDF gespeichert als $fileName")),
     );
     await OpenFile.open(file.path);
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("❌ Failed to save PDF")),
+      const SnackBar(content: Text("❌ Fehler beim Speichern")),
     );
   }
 }
