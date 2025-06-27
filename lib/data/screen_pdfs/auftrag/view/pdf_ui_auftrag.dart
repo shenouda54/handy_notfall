@@ -9,8 +9,7 @@ Future<pw.Widget> buildPdfContent(
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
   final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
-  final double tax = double.parse((netAmount / 1.19).toStringAsFixed(2));
-  final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2));
+
 
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -43,9 +42,8 @@ Future<pw.Widget> buildPdfContent(
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 40),
-                pw.Text('Kundennummer:',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text("Kundennummer:", style: pw.TextStyle(
+                    fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.Text(
                   'Datum: ${DateFormat('dd.MM.yyyy').format((data['startDate'] as Timestamp).toDate())}',
                   style: pw.TextStyle(
@@ -54,6 +52,7 @@ Future<pw.Widget> buildPdfContent(
                   ),
                   textDirection: pw.TextDirection.ltr,
                 ),
+
                 pw.Row(
                   children: [
                     pw.Text('Geräte-Typ: ${data['deviceType']}',
@@ -64,17 +63,16 @@ Future<pw.Widget> buildPdfContent(
                         style: pw.TextStyle(
                             fontSize: 12, fontWeight: pw.FontWeight.bold)),
                   ],
-                ),
-                pw.Text('IMEL: ${data['serialNumber']}',
+                ), pw.Text('IMEL: ${data['serialNumber']}',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.Text('Sperre Code: ${data['pinCode']}',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 40),
-                pw.Text('Kostenmittlung : $printId',
+                pw.SizedBox(height: 20),
+                pw.Text('Auftrag Nr: $printId',
                     style: pw.TextStyle(
-                        fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                        fontSize: 20, fontWeight: pw.FontWeight.bold)),
               ],
             ),
           ),
@@ -117,23 +115,18 @@ Future<pw.Widget> buildPdfContent(
           ],
         ),
       ),
-      pw.SizedBox(height: 3),
-      pw.Text(
-        'Wir haben Ihr Gerät geprüft und die Fehler festgestellt. Die Reparaturkosten setzen sich wie folgt zusammen:',
-        style: const pw.TextStyle(fontSize: 9),
-      ),
-      pw.SizedBox(height: 3),
+      pw.SizedBox(height: 6),
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-              ' ${data['issue']} ${data['deviceType']} inkl. Montage ',
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage  ',
               style:
               pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
           pw.Text('1',
               style:
               pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-          pw.Text('${tax.toStringAsFixed(2)} ',
+          pw.Text('${netAmount.toStringAsFixed(2)} ',
               style:
               pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
         ],
@@ -144,44 +137,22 @@ Future<pw.Widget> buildPdfContent(
 
       // Netto, MwSt, Brutto
       pw.Padding(
-        padding: const pw.EdgeInsets.only(left: 66),
+        padding: const pw.EdgeInsets.only(left: 80),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Nettobetrag',
+                pw.Text('Bruttobetrag EUR',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${tax.toStringAsFixed(2)} ',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('Umsatzsteuer 19.00 %',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${grossAmount.toStringAsFixed(2)} ',
+                pw.Text('${netAmount.toStringAsFixed(2)} ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],
             ),
             pw.Divider(thickness: 1),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('Bruttobetrag EUR',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${netAmount.toStringAsFixed(2)} ',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
           ],
         ),
       ),
@@ -195,6 +166,12 @@ Future<pw.Widget> buildPdfContent(
       pw.SizedBox(height: 10),
       pw.Text('HandyNotfall',
           style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+      // pw.Image(
+      //   pw.MemoryImage(logoBytes),
+      //   width: 140,
+      //   height: 140,
+      //   fit: pw.BoxFit.fill,
+      // ),
       pw.Spacer(),
       pw.Divider(thickness: 1),
 

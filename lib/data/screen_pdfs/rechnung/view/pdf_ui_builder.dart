@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -8,8 +9,8 @@ Future<pw.Widget> buildPdfContent(
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
   final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
-  final double tax = double.parse((netAmount * 0.19).toStringAsFixed(2));
-  final double grossAmount = double.parse((netAmount + tax).toStringAsFixed(2));
+  final double tax = double.parse((netAmount / 1.19).toStringAsFixed(2));
+  final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2));
 
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -42,10 +43,17 @@ Future<pw.Widget> buildPdfContent(
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 40),
+
+                pw.Text('Kundennummer:',
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.Text(
-                  'Datum: ${(data['startDate'] as Timestamp).toDate().toString().split(' ')[0]}',
+                  'Datum: ${DateFormat('dd.MM.yyyy').format((data['startDate'] as Timestamp).toDate())}',
                   style: pw.TextStyle(
-                      fontSize: 12, fontWeight: pw.FontWeight.bold),
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                  textDirection: pw.TextDirection.ltr,
                 ),
                 pw.Row(
                   children: [
@@ -58,13 +66,7 @@ Future<pw.Widget> buildPdfContent(
                             fontSize: 12, fontWeight: pw.FontWeight.bold)),
                   ],
                 ),
-                pw.Text('IMEL: ${data['serialNumber']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Sperre Code: ${data['pinCode']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 40),
                 pw.Text('Auftrag Nr: $printId',
                     style: pw.TextStyle(
                         fontSize: 20, fontWeight: pw.FontWeight.bold)),
@@ -110,21 +112,18 @@ Future<pw.Widget> buildPdfContent(
           ],
         ),
       ),
-      pw.SizedBox(height: 3),
-      pw.Text(
-        'Wir haben Ihr Gerät geprüft und die Fehler festgestellt. Die Reparaturkosten setzen sich wie folgt zusammen:',
-        style: const pw.TextStyle(fontSize: 9),
-      ),
-      pw.SizedBox(height: 3),
+      pw.SizedBox(height: 6),
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            'Display ${data['deviceType']} inkl. Montage  ${data['issue']}',
-            style: const pw.TextStyle(fontSize: 14),
-          ),
-          pw.Text('1', style: const pw.TextStyle(fontSize: 14)),
-          pw.Text('${netAmount.toStringAsFixed(2)} ',
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage  ',
+              style:
+                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.Text('1',
+              style:
+                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.Text('${tax.toStringAsFixed(2)} ',
               style:
                   pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
         ],
@@ -143,18 +142,22 @@ Future<pw.Widget> buildPdfContent(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('Nettobetrag',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${netAmount.toStringAsFixed(2)} €',
-                    style: const pw.TextStyle(fontSize: 12)),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text('${tax.toStringAsFixed(2)} ',
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],
             ),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('Umsatzsteuer 19.00 %',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${tax.toStringAsFixed(2)} €',
-                    style: const pw.TextStyle(fontSize: 12)),
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text('${grossAmount.toStringAsFixed(2)} ',
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],
             ),
             pw.Divider(thickness: 1),
@@ -162,9 +165,11 @@ Future<pw.Widget> buildPdfContent(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('Bruttobetrag EUR',
-                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${grossAmount.toStringAsFixed(2)} €',
-                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text('${netAmount.toStringAsFixed(2)} ',
+                    style: pw.TextStyle(
+                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
               ],
             ),
           ],
@@ -180,12 +185,12 @@ Future<pw.Widget> buildPdfContent(
       pw.SizedBox(height: 10),
       pw.Text('HandyNotfall',
           style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
-      pw.Image(
-        pw.MemoryImage(logoBytes),
-        width: 140,
-        height: 140,
-        fit: pw.BoxFit.fill,
-      ),
+      // pw.Image(
+      //   pw.MemoryImage(logoBytes),
+      //   width: 140,
+      //   height: 140,
+      //   fit: pw.BoxFit.fill,
+      // ),
       pw.Spacer(),
       pw.Divider(thickness: 1),
 

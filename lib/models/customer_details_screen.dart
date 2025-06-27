@@ -1,17 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/print_pdf/customer_number/view/customer_numbering_screen.dart';
+import 'package:intl/intl.dart';
 
+import '../data/screen_pdfs/auftrag/view/auftrag_screen.dart';
 import '../data/screen_pdfs/kostenmittlung/view/kostenmittlung_screen.dart';
 import '../data/screen_pdfs/rechnung/view/rechnung_screen.dart';
-import '../data/screen_pdfs/rechnung/view_model/pdf_logic.dart';
-import '../data/screen_pdfs/rechnung_handy/rechnung_handy_screen.dart';
-import '../data/screen_pdfs/rechnungs_verkaufe/rechnungs_verkaufe_screen.dart';
+import '../data/screen_pdfs/rechnung_handy/view/rechnung_handy_screen.dart';
+import '../data/screen_pdfs/rechnungs_verkaufe/view/rechnungs_verkaufe_screen.dart';
 
 class CustomerDetailsScreen extends StatelessWidget {
   final String customerId;
+  final int printId; // 👈 أضف هذا السطر
 
-  const CustomerDetailsScreen({super.key, required this.customerId});
+  const CustomerDetailsScreen({super.key, required this.customerId, required this.printId});
 
   Future<DocumentSnapshot> fetchCustomerDetails() async {
     return await FirebaseFirestore.instance
@@ -64,52 +66,80 @@ class CustomerDetailsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
+                detailDoubleRow('Kundennummer', '', 'Auftrag Nr ', data['printId']?.toString() ?? 'غير مرقم'),
                 detailRow('Name', data['customerFirstName']),
-                detailRow('E-Mail', data['emailAddress']),
-                detailRow('Handynummer', data['phoneNumber']),
-                detailRow('Adresse', data['address']),
                 detailRow('Stadt', data['city']),
-                detailRow('Gerätetyp', data['deviceType']),
-                detailRow('Modell', data['deviceModel']),
+                detailRow('Adresse', data['address']),
+                detailRow('Handynummer', data['phoneNumber']),
+                detailRow('E-Mail', data['emailAddress']),
+                detailRow('Model', '${data['deviceType']} ${data['deviceModel']}'),
                 detailRow('Seriennummer', data['serialNumber']),
                 detailRow('PIN code', data['pinCode']),
                 detailRow('Problem', data['issue']),
                 detailRow('Preis', "${data['price']} €"),
                 detailRow(
                   'Startdatum',
-                  (data['startDate'] as Timestamp)
-                      .toDate()
-                      .toString()
-                      .split(' ')[0],
+                  DateFormat('dd.MM.yyyy')
+                      .format((data['startDate'] as Timestamp).toDate()),
                 ),
                 detailRow(
                   'Enddatum',
-                  (data['endDate'] as Timestamp)
-                      .toDate()
-                      .toString()
-                      .split(' ')[0],
+                  DateFormat('dd-MM-yyyy').format
+                    ((data['endDate'] as Timestamp)
+                      .toDate())
                 ),
-                detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
+                // detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
                 const SizedBox(height: 20),
+                const SizedBox(height: 20),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width / 2 - 24,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (data.containsKey('printId')) {
+                          final printId = data['printId'];
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AuftragScreen(customerId: customerId, printId: printId),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا."),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Auftrag'),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Wrap(
                   spacing: 16,
                   runSpacing: 16,
                   children: [
                     {
                       'label': 'Rechnung',
-                      'screen': (String id, int pid) => RechnungScreen(customerId: id, printId: pid),
+                      'screen': (String id, int pid) =>
+                          RechnungScreen(customerId: id, printId: pid),
                     },
                     {
-                      'label': 'Rechnung verkaufe',
-                      'screen': (String id, int pid) => RechnungVerkaufeScreen(customerId: id, printId: pid),
+                      'label': 'Verkaufe',
+                      'screen': (String id, int pid) =>
+                          RechnungVerkaufeScreen(customerId: id, printId: pid),
                     },
                     {
-                      'label': 'Rechnung Handy',
-                      'screen': (String id, int pid) => RechnungHandyScreen(customerId: id, printId: pid),
+                      'label': 'Gebraucht Handy',
+                      'screen': (String id, int pid) =>
+                          RechnungHandyScreen(customerId: id, printId: pid),
                     },
                     {
                       'label': 'Kostenmittlung',
-                      'screen': (String id, int pid) => KostenmittlungScreen(customerId: id, printId: pid),
+                      'screen': (String id, int pid) =>
+                          KostenmittlungScreen(customerId: id, printId: pid),
                     },
                   ].map((item) {
                     return SizedBox(
@@ -136,8 +166,7 @@ class CustomerDetailsScreen extends StatelessWidget {
                       ),
                     );
                   }).toList(),
-                )
-
+                ),
               ],
             ),
           ),
@@ -157,4 +186,31 @@ class CustomerDetailsScreen extends StatelessWidget {
       ),
     );
   }
+  Widget detailDoubleRow(String title1, String value1, String title2, String value2) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Text("$title1: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+                Expanded(child: Text(value1)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Row(
+              children: [
+                Text("$title2: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+                Expanded(child: Text(value2)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

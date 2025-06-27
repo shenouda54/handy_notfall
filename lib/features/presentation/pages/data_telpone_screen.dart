@@ -50,11 +50,14 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   ];
 
   final List<String> issueOptions = [
-    'Display ', 'Akku ', 'Kamera ', 'Kameraglas ', 'Hörmuschel ',
-    'Ladebuchse  ', 'Lautsprecher ', 'Rückseite ', 'Wasserschaden',
-    'Geht nicht an', 'Datenübertragung', 'SoftWare', 'Neue ', 'Gebraucht ',
+    'Display', 'Akku', 'Kamera', 'Kameraglas', 'Hörmuschel',
+    'Ladebuchse', 'Lautsprecher', 'Rückseite', 'Wasserschaden',
+    'Geht nicht an', 'Datenübertragung', 'SoftWare', 'Neue', 'Gebraucht',
     'Panzerglas', 'Ladekabel', 'Hülle', 'Ladegerät', 'Nachbesserung',
+    'Mikrofon', 'Kostenvoranschlag', 'Tischlampe', 'Reinigung',
   ];
+
+
 
   final List<String> selectedIssues = [];
   bool _isLoading = true;

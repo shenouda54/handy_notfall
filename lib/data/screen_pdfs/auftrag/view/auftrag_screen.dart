@@ -1,0 +1,56 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:handy_notfall/data/screen_pdfs/auftrag/view_model/pdf_logic.dart';
+class AuftragScreen extends StatelessWidget {
+  final String customerId;
+  final int printId;
+
+  const AuftragScreen({
+    super.key,
+    required this.customerId,
+    required this.printId,
+  });
+
+  Future<Map<String, dynamic>> fetchCustomerData() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('Customers')
+        .doc(customerId)
+        .get();
+
+    if (!doc.exists) {
+      throw Exception("Kunde nicht gefunden.");
+    }
+
+    return doc.data()!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Auftrag")),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: fetchCustomerData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const Center(child: Text("❌ Kunde nicht gefunden"));
+          }
+
+          final data = snapshot.data!;
+
+          return Center(
+            child: ElevatedButton(
+              onPressed: () async {
+                await generatePdf(data, context, printId);
+              },
+              child: const Text("📄 Download Auftrag"),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

@@ -70,7 +70,10 @@ class CustomerListTile extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        CustomerDetailsScreen(customerId: customer['id']),
+                        CustomerDetailsScreen(
+                          customerId: customer['id'],
+                          printId: customer['printId'] ?? 0,
+                        ),
                   ),
                 );
               },

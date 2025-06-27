@@ -9,8 +9,6 @@ Future<pw.Widget> buildPdfContent(
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
   final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
-  final double tax = double.parse((netAmount / 1.19).toStringAsFixed(2));
-  final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2));
 
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -65,14 +63,8 @@ Future<pw.Widget> buildPdfContent(
                             fontSize: 12, fontWeight: pw.FontWeight.bold)),
                   ],
                 ),
-                pw.Text('IMEL: ${data['serialNumber']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Sperre Code: ${data['pinCode']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 40),
-                pw.Text('Kostenmittlung : $printId',
+                pw.Text('Rechnung : $printId',
                     style: pw.TextStyle(
                         fontSize: 16, fontWeight: pw.FontWeight.bold)),
               ],
@@ -107,83 +99,59 @@ Future<pw.Widget> buildPdfContent(
           children: [
             pw.Text('Beschreibung',
                 style:
-                pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
             pw.Text('Menge',
                 style:
-                pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
             pw.Text('Betrag',
                 style:
-                pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
           ],
         ),
       ),
-      pw.SizedBox(height: 3),
-      pw.Text(
-        'Wir haben Ihr Gerät geprüft und die Fehler festgestellt. Die Reparaturkosten setzen sich wie folgt zusammen:',
-        style: const pw.TextStyle(fontSize: 9),
-      ),
-      pw.SizedBox(height: 3),
+      pw.SizedBox(height: 8),
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(
-              ' ${data['issue']} ${data['deviceType']} inkl. Montage ',
+          pw.Text(' Gebraucht  ${data['deviceType']} ${data['deviceModel']} .',
               style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
           pw.Text('1',
               style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-          pw.Text('${tax.toStringAsFixed(2)} ',
+                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.Text('${netAmount.toStringAsFixed(2)} ',
               style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
         ],
       ),
+      pw.SizedBox(height: 10),
+
       pw.Divider(thickness: 1),
 
       pw.SizedBox(height: 5),
 
-      // Netto, MwSt, Brutto
-      pw.Padding(
-        padding: const pw.EdgeInsets.only(left: 66),
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('Nettobetrag',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${tax.toStringAsFixed(2)} ',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('Umsatzsteuer 19.00 %',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${grossAmount.toStringAsFixed(2)} ',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
-            pw.Divider(thickness: 1),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('Bruttobetrag EUR',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${netAmount.toStringAsFixed(2)} ',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
-          ],
-        ),
+      //  Brutto
+      pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              // الكلمه في النص وتحتهااا خط
+              pw.Text('     Gesamt:',
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold)),
+              pw.Text('${netAmount.toStringAsFixed(2)} ',
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            ],
+          ),
+          pw.SizedBox(height: 30),
+          pw.Text(
+              'Gebrauchtgegenstände / Sonderregelung, Differenzbesteuerung nach §25a UStG, MwSt. nichtausweisbar',
+              style:
+                  pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+        ],
       ),
 
       pw.SizedBox(height: 50),

@@ -65,14 +65,8 @@ Future<pw.Widget> buildPdfContent(
                             fontSize: 12, fontWeight: pw.FontWeight.bold)),
                   ],
                 ),
-                pw.Text('IMEL: ${data['serialNumber']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Sperre Code: ${data['pinCode']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 40),
-                pw.Text('Kostenmittlung : $printId',
+                pw.Text('Rechnung : $printId',
                     style: pw.TextStyle(
                         fontSize: 16, fontWeight: pw.FontWeight.bold)),
               ],
@@ -117,17 +111,12 @@ Future<pw.Widget> buildPdfContent(
           ],
         ),
       ),
-      pw.SizedBox(height: 3),
-      pw.Text(
-        'Wir haben Ihr Gerät geprüft und die Fehler festgestellt. Die Reparaturkosten setzen sich wie folgt zusammen:',
-        style: const pw.TextStyle(fontSize: 9),
-      ),
-      pw.SizedBox(height: 3),
+      pw.SizedBox(height: 6),
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-              ' ${data['issue']} ${data['deviceType']} inkl. Montage ',
+              ' ${data['issue']}${data['deviceType']}${data['deviceModel']}. ',
               style:
               pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
           pw.Text('1',
