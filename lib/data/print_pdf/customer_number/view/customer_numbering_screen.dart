@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/print_pdf/customer_number/view_model/customer_numbering_logic.dart';
-
 import '../../../delete_customer_button.dart';
 import '../../../screen_pdfs/rechnung/view_model/pdf_logic.dart';
 

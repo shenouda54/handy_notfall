@@ -11,6 +11,7 @@ Future<pw.Widget> buildPdfContent(
   final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
   final double tax = double.parse((netAmount / 1.19).toStringAsFixed(2));
   final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2));
+  final NumberFormat currencyFormat = NumberFormat('#,##0.00', 'de_DE');
 
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -115,14 +116,22 @@ Future<pw.Widget> buildPdfContent(
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(
-              ' ${data['issue']}${data['deviceType']}${data['deviceModel']}. ',
-              style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-          pw.Text('1',
-              style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-          pw.Text('${tax.toStringAsFixed(2)} ',
+          pw.Container(
+            width: 180,
+            child: pw.Text(
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage.',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+              softWrap: true,
+            ),
+          ),
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(right: 90),
+            child: pw.Text(
+              '1',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.Text('${currencyFormat.format(tax)} ',
               style:
               pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
         ],
@@ -143,7 +152,7 @@ Future<pw.Widget> buildPdfContent(
                 pw.Text('Nettobetrag',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${tax.toStringAsFixed(2)} ',
+                pw.Text('${currencyFormat.format(tax)} ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],
@@ -154,7 +163,7 @@ Future<pw.Widget> buildPdfContent(
                 pw.Text('Umsatzsteuer 19.00 %',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${grossAmount.toStringAsFixed(2)} ',
+                pw.Text('${currencyFormat.format(grossAmount)} ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],
@@ -166,7 +175,7 @@ Future<pw.Widget> buildPdfContent(
                 pw.Text('Bruttobetrag EUR',
                     style: pw.TextStyle(
                         fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${netAmount.toStringAsFixed(2)} ',
+                pw.Text('${currencyFormat.format(netAmount)} ',
                     style: pw.TextStyle(
                         fontSize: 14, fontWeight: pw.FontWeight.bold)),
               ],

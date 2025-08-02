@@ -9,6 +9,8 @@ Future<pw.Widget> buildPdfContent(
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
   final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
+  final NumberFormat currencyFormat = NumberFormat('#,##0.00', 'de_DE');
+
 
 
   return pw.Column(
@@ -70,7 +72,7 @@ Future<pw.Widget> buildPdfContent(
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 20),
-                pw.Text('Auftrag Nr: $printId',
+                pw.Text('Auftrag Nr: ${data['customerCode'] ?? data['printId'] ?? '??'}',
                     style: pw.TextStyle(
                         fontSize: 20, fontWeight: pw.FontWeight.bold)),
               ],
@@ -119,14 +121,23 @@ Future<pw.Widget> buildPdfContent(
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(
-              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage  ',
-              style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-          pw.Text('1',
-              style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-          pw.Text('${netAmount.toStringAsFixed(2)} ',
+          pw.Container(
+            width: 180,
+            child: pw.Text(
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage.',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+              softWrap: true,
+            ),
+          ),
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(right: 90),
+            child: pw.Text(
+              '1',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+
+          pw.Text('${currencyFormat.format(netAmount)} ',
               style:
               pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
         ],
@@ -144,10 +155,10 @@ Future<pw.Widget> buildPdfContent(
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Bruttobetrag EUR',
+                pw.Text('Bruttobetrag EUR ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${netAmount.toStringAsFixed(2)} ',
+                pw.Text('${currencyFormat.format(netAmount)} ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],
