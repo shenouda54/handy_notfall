@@ -5,6 +5,7 @@ import 'package:handy_notfall/features/domain/usecases/go_to_data_screen_usecase
 import 'package:handy_notfall/features/presentation/pages/search_screen.dart';
 
 import '../../../data/custom_input_field.dart';
+import '../../auth/presentation/login/login.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});
@@ -77,7 +78,11 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       onPressed: () async {
                         Navigator.pop(context);
                         await FirebaseAuth.instance.signOut();
-                      },
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()), // عدل اسم الصفحة حسب تطبيقك
+                              (route) => false,
+                        );
+                        },
                     ),
                   ],
                 ),
