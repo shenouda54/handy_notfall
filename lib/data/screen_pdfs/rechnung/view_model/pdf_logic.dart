@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../shared/storage_path.dart';
 import '../view/pdf_ui_builder.dart';
 
 Future<bool> requestStoragePermission() async {
@@ -39,14 +40,8 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, int pr
       return;
     }
 
-    // استخدام getExternalStorageDirectory() بدلاً من المسار المباشر
-    final directory = await getExternalStorageDirectory();
-    if (directory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Cannot access storage directory")),
-      );
-      return;
-    }
+    final directory = await StorageHelper.getSafeStorageDirectory(context);
+    if (directory == null) return;
 
     final now = DateTime.now();
     final fileName = 'customer_details_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}.pdf';

@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../shared/storage_path.dart';
 import '../view/pdf_ui_verkaufe.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -38,14 +39,8 @@ Future<void> generatePdf(
       return;
     }
 
-    // استخدام getExternalStorageDirectory() بدلاً من المسار المباشر
-    final directory = await getExternalStorageDirectory();
-    if (directory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Cannot access storage directory")),
-      );
-      return;
-    }
+    final directory = await StorageHelper.getSafeStorageDirectory(context);
+    if (directory == null) return;
 
     final now = DateTime.now();
     final fileName =

@@ -1,14 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
+import '../../shared/storage_path.dart';
 import '../view/pdf_ui_auftrag.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<bool> requestStoragePermission() async {
   if (Platform.isAndroid) {
-    // للـ Android 11+ (API 30+)
     if (await Permission.manageExternalStorage.isGranted) {
       return true;
     }
@@ -38,13 +37,8 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, int pr
       return;
     }
 
-    final directory = await getExternalStorageDirectory();
-    if (directory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Cannot access storage directory")),
-      );
-      return;
-    }
+    final directory = await StorageHelper.getSafeStorageDirectory(context);
+    if (directory == null) return;
 
     final now = DateTime.now();
     final fileName = 'Auftrag_Screen_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}.pdf';
