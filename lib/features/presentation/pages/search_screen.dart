@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/models/customer_list_tile.dart';
+import 'package:handy_notfall/data/error_widget.dart';
 import 'package:intl/intl.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -32,8 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
     try {
       String? userEmail = FirebaseAuth.instance.currentUser?.email;
       if (userEmail == null) {
-        print("❌ لم يتم العثور على المستخدم الحالي!");
-        return;
+        throw Exception("User not authenticated");
       }
 
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -67,6 +67,15 @@ class _SearchScreenState extends State<SearchScreen> {
       });
     } catch (e) {
       print("❌ خطأ في جلب البيانات: $e");
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

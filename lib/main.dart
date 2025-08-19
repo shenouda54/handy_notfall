@@ -1,18 +1,55 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'firebase_options.dart';
 import 'features/auth/presentation/login/login.dart';
 import 'features/presentation/pages/customer_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
+import 'data/error_widget.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const MyApp());
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Forward Flutter framework errors to this zone
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      if (details.stack != null) {
+        Zone.current.handleUncaughtError(details.exception, details.stack!);
+      }
+    };
+
+    // Friendly error UI for uncaught build errors
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      return CustomErrorWidget(
+        errorMessage: details.exceptionAsString(),
+        onRetry: () {
+          runApp(const MyApp());
+        },
+      );
+    };
+
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      // Enable offline persistence for Firestore to reduce startup failures
+      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      // ignore: avoid_print
+      print("✅ Firebase initialized successfully");
+    } catch (e) {
+      // ignore: avoid_print
+      print("❌ Firebase initialization failed: $e");
+    }
+
+    runApp(const MyApp());
+  }, (error, stack) {
+    // ignore: avoid_print
+    print('❌ Uncaught error: $error');
+  });
 }
 
 class MyApp extends StatelessWidget {

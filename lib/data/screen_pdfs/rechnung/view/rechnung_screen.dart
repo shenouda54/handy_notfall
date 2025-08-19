@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:handy_notfall/data/screen_pdfs/rechnung/view_model/pdf_logic.dart';
+import 'package:handy_notfall/data/error_widget.dart';
 
 class RechnungScreen extends StatelessWidget {
   final String customerId;
@@ -13,16 +14,20 @@ class RechnungScreen extends StatelessWidget {
   });
 
   Future<Map<String, dynamic>> fetchCustomerData() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('Customers')
-        .doc(customerId)
-        .get();
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('Customers')
+          .doc(customerId)
+          .get();
 
-    if (!doc.exists) {
-      throw Exception("Kunde nicht gefunden.");
+      if (!doc.exists) {
+        throw Exception("Customer not found");
+      }
+
+      return doc.data()!;
+    } catch (e) {
+      throw Exception('Failed to load customer data: $e');
     }
-
-    return doc.data()!;
   }
 
   @override
@@ -36,8 +41,22 @@ class RechnungScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError || !snapshot.hasData) {
-            return const Center(child: Text("❌ Kunde nicht gefunden"));
+          if (snapshot.hasError) {
+            return CustomErrorWidget(
+              errorMessage: snapshot.error.toString(),
+              onRetry: () {
+                // Force rebuild to retry
+                (context as Element).markNeedsBuild();
+              },
+              onGoBack: () => Navigator.pop(context),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return CustomErrorWidget(
+              errorMessage: "Customer data not found",
+              onGoBack: () => Navigator.pop(context),
+            );
           }
 
           final data = snapshot.data!;

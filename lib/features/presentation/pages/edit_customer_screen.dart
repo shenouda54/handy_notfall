@@ -4,6 +4,7 @@ import 'package:handy_notfall/data/custom_input_field.dart';
 import 'package:handy_notfall/data/date_picker_field.dart';
 import 'package:handy_notfall/data/issue_selection.dart';
 import 'package:handy_notfall/data/device_type_selection.dart';
+import 'package:handy_notfall/data/error_widget.dart';
 import 'package:intl/intl.dart';
 
 class EditCustomerScreen extends StatefulWidget {
@@ -54,37 +55,55 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   }
 
   Future<void> _loadCustomerData() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('Customers')
-        .doc(widget.customerId)
-        .get();
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('Customers')
+          .doc(widget.customerId)
+          .get();
 
-    final data = doc.data();
-    if (data == null) return;
+      if (!doc.exists) {
+        throw Exception("Customer not found");
+      }
 
-    setState(() {
-      firstNameController.text = data['customerFirstName'] ?? '';
-      addressController.text = data['address'] ?? '';
-      cityController.text = data['city'] ?? '';
-      phoneController.text = data['phoneNumber'] ?? '';
-      emailController.text = data['emailAddress'] ?? '';
-      modelController.text = data['deviceModel'] ?? '';
-      serialNumberController.text = data['serialNumber'] ?? '';
-      pinCodeController.text = data['pinCode'] ?? '';
-      repairPriceController.text = data['price'].toString();
-      selectedDeviceTypes = (data['deviceType'] as String)
-          .split(', ')
-          .where((e) => e.isNotEmpty)
-          .toList();
-      selectedIssues = (data['issue'] as String)
-          .split(', ')
-          .where((e) => e.isNotEmpty)
-          .toList();
-      startDateController.text = DateFormat('yyyy-MM-dd')
-          .format((data['startDate'] as Timestamp).toDate());
-      endDateController.text = DateFormat('yyyy-MM-dd')
-          .format((data['endDate'] as Timestamp).toDate());
-    });
+      final data = doc.data();
+      if (data == null) {
+        throw Exception("Customer data is null");
+      }
+
+      setState(() {
+        firstNameController.text = data['customerFirstName'] ?? '';
+        addressController.text = data['address'] ?? '';
+        cityController.text = data['city'] ?? '';
+        phoneController.text = data['phoneNumber'] ?? '';
+        emailController.text = data['emailAddress'] ?? '';
+        modelController.text = data['deviceModel'] ?? '';
+        serialNumberController.text = data['serialNumber'] ?? '';
+        pinCodeController.text = data['pinCode'] ?? '';
+        repairPriceController.text = data['price'].toString();
+        selectedDeviceTypes = (data['deviceType'] as String)
+            .split(', ')
+            .where((e) => e.isNotEmpty)
+            .toList();
+        selectedIssues = (data['issue'] as String)
+            .split(', ')
+            .where((e) => e.isNotEmpty)
+            .toList();
+        startDateController.text = DateFormat('yyyy-MM-dd')
+            .format((data['startDate'] as Timestamp).toDate());
+        endDateController.text = DateFormat('yyyy-MM-dd')
+            .format((data['endDate'] as Timestamp).toDate());
+      });
+    } catch (e) {
+      print("Error loading customer data: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading customer data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _updateCustomer() async {

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/print_pdf/customer_number/view/customer_numbering_screen.dart';
+import 'package:handy_notfall/data/error_widget.dart';
 import 'package:intl/intl.dart';
 
 import '../data/screen_pdfs/auftrag/view/auftrag_screen.dart';
@@ -16,10 +17,14 @@ class CustomerDetailsScreen extends StatelessWidget {
   const CustomerDetailsScreen({super.key, required this.customerId, required this.printId});
 
   Future<DocumentSnapshot> fetchCustomerDetails() async {
-    return await FirebaseFirestore.instance
-        .collection('Customers')
-        .doc(customerId)
-        .get();
+    try {
+      return await FirebaseFirestore.instance
+          .collection('Customers')
+          .doc(customerId)
+          .get();
+    } catch (e) {
+      throw Exception('Failed to load customer data: $e');
+    }
   }
 
   @override
@@ -33,9 +38,21 @@ class CustomerDetailsScreen extends StatelessWidget {
           );
         }
 
+        if (snapshot.hasError) {
+          return CustomErrorWidget(
+            errorMessage: snapshot.error.toString(),
+            onRetry: () {
+              // Force rebuild to retry
+              (context as Element).markNeedsBuild();
+            },
+            onGoBack: () => Navigator.pop(context),
+          );
+        }
+
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const Scaffold(
-            body: Center(child: Text("Keine Daten gefunden")),
+          return CustomErrorWidget(
+            errorMessage: "Customer data not found",
+            onGoBack: () => Navigator.pop(context),
           );
         }
 

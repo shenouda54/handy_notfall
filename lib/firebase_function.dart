@@ -13,10 +13,16 @@ class FirebaseFireStore {
   }
 
   static Future<void> addCustomer(CustomerModel model) async {
-    var collection = getCustomersCollection();
-    var docRef = collection.doc(model.id.isEmpty ? null : model.id); // ✅ لو معاه ID ياخده لو مفيش يعمل جديد
-    model.id = docRef.id; // ✅ نحفظ الـ ID جوه الموديل
+    try {
+      var collection = getCustomersCollection();
+      var docRef = collection.doc(model.id.isEmpty ? null : model.id);
+      model.id = docRef.id;
 
-    await docRef.set(model); // ✅ حفظ العميل
+      await docRef.set(model);
+      print("✅ Customer saved successfully");
+    } catch (e) {
+      print("❌ Error saving customer: $e");
+      throw Exception('Failed to save customer: $e');
+    }
   }
 }

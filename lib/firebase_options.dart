@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBBE3SZXyAxQyyycTpsUDEfbBZ_o8yz61A',
-    appId: '1:277603380839:android:718b21d72dabf66dd92ec2',
+    appId: '1:277603380839:android:cdf7df24411a0126d92ec2',
     messagingSenderId: '277603380839',
     projectId: 'handy-notfall',
     storageBucket: 'handy-notfall.firebasestorage.app',

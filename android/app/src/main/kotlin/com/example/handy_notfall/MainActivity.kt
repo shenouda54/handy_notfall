@@ -1,5 +1,5 @@
-package com.example.handy_notfall
+package com.handy_notfall
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity()
+class MainActivity : FlutterActivity()
