@@ -7,8 +7,9 @@ import 'package:handy_notfall/data/device_type_selection.dart';
 import 'package:handy_notfall/data/issue_selection.dart';
 import 'package:handy_notfall/features/domain/usecases/save_customer_data_usecase.dart';
 import 'package:intl/intl.dart';
-
 import '../../domain/entities/customer_data_telpone_entity.dart';
+import 'package:handy_notfall/service/issue_storage_service.dart';
+import 'package:handy_notfall/service/storage_service.dart';
 
 class DataTelponeScreen extends StatefulWidget {
   final String firstName;
@@ -18,13 +19,13 @@ class DataTelponeScreen extends StatefulWidget {
   final String emailAddress;
 
   const DataTelponeScreen({
-    Key? key,
+    super.key,
     required this.firstName,
     required this.address,
     required this.city,
     required this.phoneNumber,
     required this.emailAddress,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTelponeScreen> createState() => _DataTelponeScreenState();
@@ -43,13 +44,14 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final TextEditingController customDeviceController = TextEditingController();
 
   List<String> selectedDeviceTypes = [];
-  final List<String> deviceTypes = [
-    'Dell', 'Apple', 'Samsung', 'HP', 'Lenovo', 'Sony', 'LG', 'Huawei',
+  List<String> deviceTypes = [
+     'Apple', 'Samsung','Xiaomi', 'HP','Dell', 'Lenovo', 'Sony', 'LG', 'Huawei',
     'Toshiba', 'Asus', 'Acer', 'Microsoft', 'Realme', 'HTC', 'Motorola',
-    'Blackberry', 'Xiaomi', 'Caterpillar', 'Oppo', 'Google', 'Oneplus',
+    'Blackberry',  'Caterpillar', 'Oppo', 'Google', 'Oneplus',
   ];
+  // To Do  هنعمل تعديل بدل الاضافيه اليدويه وهندخل  api
 
-  final List<String> issueOptions = [
+  List<String> issueOptions = [
     'Display', 'Akku', 'Kamera', 'Kameraglas', 'Hörmuschel',
     'Ladebuchse', 'Lautsprecher', 'Rückseite', 'Wasserschaden',
     'Geht nicht an', 'Datenübertragung', 'SoftWare', 'Neue', 'Gebraucht',
@@ -57,18 +59,45 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Mikrofon', 'Kostenvoranschlag', 'Tischlampe', 'Reinigung',
   ];
 
-
+  // To Do  هنعمل تعديل بدل الاضافيه اليدويه وهندخل  api
 
   final List<String> selectedIssues = [];
   bool _isLoading = true;
 
+
+
   @override
   void initState() {
     super.initState();
+    _loadCustomDeviceTypes();
+    _loadCustomIssues();
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _isLoading = false;
       });
+    });
+  }
+
+  Future<void> _loadCustomDeviceTypes() async {
+    final customDeviceTypes = await StorageService.loadDeviceTypes();
+    setState(() {
+      for (final type in customDeviceTypes) {
+        if (!deviceTypes.contains(type)) {
+          deviceTypes.add(type);
+        }
+      }
+    });
+  }
+
+  Future<void> _loadCustomIssues() async {
+    final customIssues = await IssueStorageService.loadIssues();
+    setState(() {
+      // دمج الأعطال المحفوظة مع الافتراضية بدون تكرار
+      for (final issue in customIssues) {
+        if (!issueOptions.contains(issue)) {
+          issueOptions.add(issue);
+        }
+      }
     });
   }
 
@@ -102,12 +131,16 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               DeviceTypeSelection(
                 deviceTypes: deviceTypes,
                 selectedDeviceTypes: selectedDeviceTypes,
-                onAdd: (value) {
+                onAdd: (value) async {
                   setState(() {
                     if (!selectedDeviceTypes.contains(value)) {
                       selectedDeviceTypes.add(value);
                     }
+                    if (!deviceTypes.contains(value)) {
+                      deviceTypes.add(value);
+                    }
                   });
+                  await StorageService.saveDeviceType(value);
                 },
                 onRemove: (value) {
                   setState(() {
@@ -123,20 +156,28 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               const SizedBox(height: 16.0),
               CustomInputField(controller: pinCodeController, label: 'Speer/Pin Code *'),
               const SizedBox(height: 16.0),
+              // إزالة Row التي تحتوي على IssueSelection وIconButton البحث
               IssueSelection(
                 issueOptions: issueOptions,
                 selectedIssues: selectedIssues,
                 customIssueController: customIssueController,
-                onAddIssue: (issue) {
+                onAddIssue: (issue) async {
                   setState(() {
-                    selectedIssues.add(issue);
+                    if (!selectedIssues.contains(issue)) {
+                      selectedIssues.add(issue);
+                    }
+                    if (!issueOptions.contains(issue)) {
+                      issueOptions.add(issue);
+                    }
                   });
+                  await StorageService.saveIssue(issue);
                 },
                 onRemoveIssue: (issue) {
                   setState(() {
                     selectedIssues.remove(issue);
                   });
                 },
+                menuMaxHeight: 250,
               ),
               const SizedBox(height: 16.0),
               CustomInputField(
@@ -149,6 +190,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               const SizedBox(height: 16.0),
               DatePickerField(controller: endDateController, label: 'Abholung *'),
               const SizedBox(height: 20.0),
+              // add new dart file logic
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(

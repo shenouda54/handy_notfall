@@ -3,6 +3,8 @@ import 'package:handy_notfall/models/customer_details_screen.dart';
 import 'package:handy_notfall/features/presentation/pages/edit_customer_screen.dart';
 
 import '../features/presentation/pages/data_telpone_screen.dart';
+import 'package:handy_notfall/data/screen_pdfs/rechnung/view_model/pdf_logic.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomerListTile extends StatelessWidget {
   final Map<String, dynamic> customer;
@@ -76,6 +78,32 @@ class CustomerListTile extends StatelessWidget {
                         ),
                   ),
                 );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.print, color: Colors.deepPurple),
+              tooltip: 'طباعة الفاتورة',
+              onPressed: () async {
+                try {
+                  final doc = await FirebaseFirestore.instance
+                      .collection('Customers')
+                      .doc(customer['id'])
+                      .get();
+                  if (!doc.exists) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('❌ لم يتم العثور على بيانات العميل')),
+                    );
+                    return;
+                  }
+                  final data = doc.data()!;
+                  // تأكد من وجود printId الصحيح
+                  data['printId'] = customer['printId'] ?? data['printId'] ?? 0;
+                  await generatePdf(data, context, data['printId']);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('❌ خطأ أثناء تحميل الفاتورة: $e')),
+                  );
+                }
               },
             ),
           ],

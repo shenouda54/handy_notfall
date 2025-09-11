@@ -4,13 +4,12 @@ import 'package:handy_notfall/data/custom_input_field.dart';
 import 'package:handy_notfall/data/date_picker_field.dart';
 import 'package:handy_notfall/data/issue_selection.dart';
 import 'package:handy_notfall/data/device_type_selection.dart';
-import 'package:handy_notfall/data/error_widget.dart';
 import 'package:intl/intl.dart';
 
 class EditCustomerScreen extends StatefulWidget {
   final String customerId;
 
-  const EditCustomerScreen({Key? key, required this.customerId}) : super(key: key);
+  const EditCustomerScreen({super.key, required this.customerId});
 
   @override
   State<EditCustomerScreen> createState() => _EditCustomerScreenState();

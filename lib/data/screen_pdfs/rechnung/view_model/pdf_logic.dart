@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../shared/storage_path.dart';
 import '../view/pdf_ui_builder.dart';
@@ -53,7 +52,7 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, int pr
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("✅ PDF saved as $fileName")),
       );
-      await OpenFile.open(file.path);
+      await OpenFile.open(file.path); // إرجاع فتح الملف تلقائياً
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("❌ Failed to save PDF")),
