@@ -45,6 +45,10 @@ class _CustomerScreenState extends State<CustomerScreen> {
     emailController.clear();
   }
 
+  String capitalizeEachWord(String input) {
+    return input.split(' ').map((str) => str.isNotEmpty ? '${str[0].toUpperCase()}${str.substring(1)}' : '').join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,11 +118,48 @@ class _CustomerScreenState extends State<CustomerScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomInputField(controller: firstNameController, label: "Vor- und Nachname"),
-              CustomInputField(controller:cityController, label: 'Straße & Hausnummer *'),
-              CustomInputField(controller:addressController,label: 'PLZ & Wohnort  *'),
+              CustomInputField(
+                controller: firstNameController,
+                label: "Vor- und Nachname",
+                onChanged: (val) {
+                  final newVal = capitalizeEachWord(val);
+                  if (val != newVal) {
+                    firstNameController.value = firstNameController.value.copyWith(
+                      text: newVal,
+                      selection: TextSelection.collapsed(offset: newVal.length),
+                    );
+                  }
+                },
+              ),
+              CustomInputField(
+                controller: cityController,
+                label: 'Straße & Hausnummer *',
+                onChanged: (val) {
+                  final newVal = capitalizeEachWord(val);
+                  if (val != newVal) {
+                    cityController.value = cityController.value.copyWith(
+                      text: newVal,
+                      selection: TextSelection.collapsed(offset: newVal.length),
+                    );
+                  }
+                },
+              ),
+              CustomInputField(
+                controller: addressController,
+                label: 'PLZ & Wohnort  *',
+                onChanged: (val) {
+                  final newVal = capitalizeEachWord(val);
+                  if (val != newVal) {
+                    addressController.value = addressController.value.copyWith(
+                      text: newVal,
+                      selection: TextSelection.collapsed(offset: newVal.length),
+                    );
+                  }
+                },
+              ),
               Row(
-                children: [
+                children:
+                [
                   Expanded(
                     child:CustomInputField(controller:phoneController,label:  'Telefonnummer  *'),
                   ),

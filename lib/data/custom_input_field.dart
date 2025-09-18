@@ -4,12 +4,14 @@ class CustomInputField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final TextInputType keyboardType;
+  final ValueChanged<String>? onChanged;
 
   const CustomInputField({
     super.key,
     required this.controller,
     required this.label,
     this.keyboardType = TextInputType.text,
+    this.onChanged,
   });
 
   @override
@@ -23,6 +25,7 @@ class CustomInputField extends StatelessWidget {
           labelText: label,
           border: const OutlineInputBorder(),
         ),
+        onChanged: onChanged,
       ),
     );
   }
