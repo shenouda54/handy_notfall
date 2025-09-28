@@ -12,9 +12,9 @@ import '../data/screen_pdfs/rechnungs_verkaufe/view/rechnungs_verkaufe_screen.da
 
 class CustomerDetailsScreen extends StatelessWidget {
   final String customerId;
-  final int printId; // 👈 أضف هذا السطر
+  final String auftragNr;
 
-  const CustomerDetailsScreen({super.key, required this.customerId, required this.printId});
+  const CustomerDetailsScreen({super.key, required this.customerId, required this.auftragNr});
 
   Future<DocumentSnapshot> fetchCustomerDetails() async {
     try {
@@ -83,7 +83,7 @@ class CustomerDetailsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
-                detailDoubleRow('Kundennummer', '', 'Auftrag Nr ', data['printId']?.toString() ?? 'غير مرقم'),
+                detailDoubleRow('Kundennummer', data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر', 'Auftrag Nr ', data['auftragNr']?.toString() ?? 'غير مرقّم'),
                 detailRow('Name', data['customerFirstName']),
                 detailRow('Stadt', data['city']),
                 detailRow('Adresse', data['address']),
@@ -113,12 +113,12 @@ class CustomerDetailsScreen extends StatelessWidget {
                     width: MediaQuery.of(context).size.width / 2 - 24,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (data.containsKey('printId')) {
-                          final printId = data['printId'];
+                        if (data.containsKey('auftragNr')) {
+                          final auftragNr = data['auftragNr']?.toString() ?? '';
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => AuftragScreen(customerId: customerId, printId: printId),
+                              builder: (_) => AuftragScreen(customerId: customerId, auftragNr: auftragNr),
                             ),
                           );
                         } else {
@@ -140,35 +140,35 @@ class CustomerDetailsScreen extends StatelessWidget {
                   children: [
                     {
                       'label': 'Rechnung',
-                      'screen': (String id, int pid) =>
-                          RechnungScreen(customerId: id, printId: pid),
+                      'screen': (String id, String auftragNr) =>
+                          RechnungScreen(customerId: id, auftragNr: auftragNr),
                     },
                     {
                       'label': 'Verkaufe',
-                      'screen': (String id, int pid) =>
-                          RechnungVerkaufeScreen(customerId: id, printId: pid),
+                      'screen': (String id, String auftragNr) =>
+                          RechnungVerkaufeScreen(customerId: id, auftragNr: auftragNr),
                     },
                     {
                       'label': 'Gebraucht Handy',
-                      'screen': (String id, int pid) =>
-                          RechnungHandyScreen(customerId: id, printId: pid),
+                      'screen': (String id, String auftragNr) =>
+                          RechnungHandyScreen(customerId: id, auftragNr: auftragNr),
                     },
                     {
                       'label': 'Kostenmittlung',
-                      'screen': (String id, int pid) =>
-                          KostenmittlungScreen(customerId: id, printId: pid),
+                      'screen': (String id, String auftragNr) =>
+                          KostenmittlungScreen(customerId: id, auftragNr: auftragNr),
                     },
                   ].map((item) {
                     return SizedBox(
                       width: MediaQuery.of(context).size.width / 2 - 24,
                       child: ElevatedButton(
                         onPressed: () {
-                          if (data.containsKey('printId')) {
-                            final printId = data['printId'];
+                          if (data.containsKey('auftragNr')) {
+                            final auftragNr = data['auftragNr']?.toString() ?? '';
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => (item['screen'] as Widget Function(String, int))(customerId, printId),
+                                builder: (_) => (item['screen'] as Widget Function(String, String))(customerId, auftragNr),
                               ),
                             );
                           } else {

@@ -5,12 +5,12 @@ import 'package:handy_notfall/data/error_widget.dart';
 
 class RechnungScreen extends StatelessWidget {
   final String customerId;
-  final int printId;
+  final String auftragNr;
 
   const RechnungScreen({
     super.key,
     required this.customerId,
-    required this.printId,
+    required this.auftragNr,
   });
 
   Future<Map<String, dynamic>> fetchCustomerData() async {
@@ -64,7 +64,7 @@ class RechnungScreen extends StatelessWidget {
           return Center(
             child: ElevatedButton(
               onPressed: () async {
-                await generatePdf(data, context, printId);
+                await generatePdf(data, context, auftragNr);
               },
               child: const Text("📄 Download Rechnung"),
             ),

@@ -4,7 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<pw.Widget> buildPdfContent(
-    Map<String, dynamic> data, int printId) async {
+    Map<String, dynamic> data, String auftragNr) async {
   final ByteData bytes = await rootBundle.load('assets/images/pdf.png');
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
@@ -45,7 +45,7 @@ Future<pw.Widget> buildPdfContent(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 40),
 
-                pw.Text('Kundennummer:',
+                pw.Text('Kundennummer: ${data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر'}',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.Text(
@@ -68,7 +68,7 @@ Future<pw.Widget> buildPdfContent(
                   ],
                 ),
                 pw.SizedBox(height: 40),
-                pw.Text('Auftrag Nr: $printId',
+                pw.Text('Auftrag Nr: $auftragNr',
                     style: pw.TextStyle(
                         fontSize: 20, fontWeight: pw.FontWeight.bold)),
               ],

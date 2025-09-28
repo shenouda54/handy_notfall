@@ -4,12 +4,12 @@ import 'package:handy_notfall/data/screen_pdfs/rechnung_handy/view_model/pdf_log
 
 class RechnungHandyScreen extends StatelessWidget {
   final String customerId;
-  final int printId;
+  final String auftragNr;
 
   const RechnungHandyScreen({
     super.key,
     required this.customerId,
-    required this.printId,
+    required this.auftragNr,
   });
   Future<Map<String, dynamic>> fetchCustomerData() async {
     final doc = await FirebaseFirestore.instance
@@ -43,7 +43,7 @@ class RechnungHandyScreen extends StatelessWidget {
           return Center(
             child: ElevatedButton(
               onPressed: () async {
-                await generatePdf(data, context, printId);
+                await generatePdf(data, context, auftragNr);
               },
               child: const Text("📄 Download RechnungHandy PDF"),
             ),

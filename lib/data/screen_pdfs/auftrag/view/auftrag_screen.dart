@@ -4,12 +4,12 @@ import 'package:handy_notfall/data/screen_pdfs/auftrag/view_model/pdf_logic.dart
 import 'package:handy_notfall/data/error_widget.dart';
 class AuftragScreen extends StatelessWidget {
   final String customerId;
-  final int printId;
+  final String auftragNr;
 
   const AuftragScreen({
     super.key,
     required this.customerId,
-    required this.printId,
+    required this.auftragNr,
   });
 
   Future<Map<String, dynamic>> fetchCustomerData() async {
@@ -63,7 +63,7 @@ class AuftragScreen extends StatelessWidget {
           return Center(
             child: ElevatedButton(
               onPressed: () async {
-                await generatePdf(data, context, printId);
+                await generatePdf(data, context, auftragNr);
               },
               child: const Text("📄 Download Auftrag"),
             ),

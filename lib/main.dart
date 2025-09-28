@@ -9,6 +9,8 @@ import 'features/auth/presentation/login/login.dart';
 import 'features/presentation/pages/customer_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
 import 'data/error_widget.dart';
+import 'service/auftrag_reindex_service.dart';
+import 'service/customer_number_service.dart';
 
 void main() {
   runZonedGuarded(() async {
@@ -60,7 +62,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Handy Notfall',
-      home:  AuthGate(),
+      home: AuthGate(),
     );
   }
 }

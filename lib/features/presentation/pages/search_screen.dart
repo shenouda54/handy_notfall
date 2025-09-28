@@ -28,7 +28,12 @@ class _SearchScreenState extends State<SearchScreen> {
     fetchCustomers();
   }
 
-  Future<void> fetchCustomers() async {
+  // دالة منفصلة لإضافة عميل جديد
+  Future<void> refreshAfterAdd() async {
+    await fetchCustomers(clearFilters: true);
+  }
+
+  Future<void> fetchCustomers({bool clearFilters = false}) async {
     try {
       String? userEmail = FirebaseAuth.instance.currentUser?.email;
       if (userEmail == null) {
@@ -61,7 +66,18 @@ class _SearchScreenState extends State<SearchScreen> {
 
       setState(() {
         customers = customerList;
-        filteredCustomers = customerList;
+        
+        if (clearFilters) {
+          // مسح الفلاتر عند إضافة عميل جديد لضمان ظهوره
+          searchController.clear();
+          dateController.clear();
+          modelController.clear();
+          filteredCustomers = customerList;
+        } else {
+          // إعادة تطبيق الفلاتر الحالية بعد جلب البيانات الجديدة
+          filterSearch();
+        }
+        
         currentPage = 0;
       });
     } catch (e) {
@@ -101,7 +117,7 @@ class _SearchScreenState extends State<SearchScreen> {
         return matchesSearch && matchesDeviceText && matchesDate;
       }).toList();
 
-      currentPage = 0;
+      currentPage = 0; // إعادة تعيين الصفحة إلى الأولى
     });
   }
 
@@ -195,6 +211,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: CustomerListTile(
                             customer: customer,
                             onEdit: fetchCustomers,
+                            onAdd: refreshAfterAdd,
                           ),
                         );
                       },

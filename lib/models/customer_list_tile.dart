@@ -9,8 +9,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CustomerListTile extends StatelessWidget {
   final Map<String, dynamic> customer;
   final VoidCallback? onEdit;
+  final VoidCallback? onAdd;
 
-  const CustomerListTile({super.key, required this.customer,this.onEdit});
+  const CustomerListTile({super.key, required this.customer, this.onEdit, this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +29,7 @@ class CustomerListTile extends StatelessWidget {
             return;
           }
           final data = doc.data()!;
-          data['printId'] = customer['printId'] ?? data['printId'] ?? 0;
-          await generatePdf(data, context, data['printId']);
+          await generatePdf(data, context, data['auftragNr'] ?? '');
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('❌ خطأ أثناء تحميل الفاتورة: $e')),
@@ -40,7 +40,7 @@ class CustomerListTile extends StatelessWidget {
         child: ListTile(
           title: Text(customer["firstName"]),
           subtitle: Text(
-            "Gerät: 9${customer["deviceType"]}"
+            "Gerät: ${customer["deviceType"]}"
             " , ${customer["deviceModel"]}\n"
             "Problem: ${customer["issue"]}\n"
             "Handynummer: ${customer["phone"]}\n"
@@ -66,8 +66,8 @@ class CustomerListTile extends StatelessWidget {
                       ),
                     ),
                   );
-                  if (result == true && onEdit != null) {
-                    onEdit!(); // ✅ تحديث الشاشة بعد الإضافة
+                  if (result == true && onAdd != null) {
+                    onAdd!(); // ✅ تحديث الشاشة بعد الإضافة مع مسح الفلاتر
                   }
                 }
               ),
@@ -96,7 +96,7 @@ class CustomerListTile extends StatelessWidget {
                       builder: (context) =>
                           CustomerDetailsScreen(
                             customerId: customer['id'],
-                            printId: customer['printId'] ?? 0,
+                            auftragNr: customer['auftragNr']?.toString() ?? '',
                           ),
                     ),
                   );

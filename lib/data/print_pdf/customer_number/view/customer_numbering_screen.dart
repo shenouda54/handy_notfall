@@ -22,7 +22,7 @@ class _CustomerNumberingScreenState extends State<CustomerNumberingScreen> {
   bool isProcessing = false;
   String result = "";
   List<Map<String, dynamic>> devices = [];
-  int? printId;
+  int? kundennummer;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _CustomerNumberingScreenState extends State<CustomerNumberingScreen> {
       result = response["message"];
       if (response["success"]) {
         devices = response["devices"];
-        printId = response["printId"];
+        kundennummer = response["kundennummer"];
       }
     });
   }
@@ -74,7 +74,7 @@ class _CustomerNumberingScreenState extends State<CustomerNumberingScreen> {
                   Text(result,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 20),
-                  if (devices.isNotEmpty && printId != null)
+                  if (devices.isNotEmpty && kundennummer != null)
                     Expanded(
                       child: ListView.builder(
                         itemCount: devices.length,
@@ -85,10 +85,18 @@ class _CustomerNumberingScreenState extends State<CustomerNumberingScreen> {
                             child: ListTile(
                               title: Text(
                                   "${device['deviceType']} - ${device['deviceModel']}"),
-                              subtitle: Text("SN: ${device['serialNumber']}"),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("SN: ${device['serialNumber']}"),
+                                  Text("Kundennummer: ${device['kundennummer'] ?? 'غير متوفر'}"),
+                                  Text("Auftrag Nr: ${device['auftragNr'] ?? 'غير متوفر'}"),
+                                ],
+                              ),
                               trailing: ElevatedButton(
                                 onPressed: () {
-                                  generatePdf(device, context, printId!);
+                                  final auftragNr = device['auftragNr']?.toString() ?? '';
+                                  generatePdf(device, context, auftragNr);
                                 },
                                 child: const Text("PDF"),
                               ),
