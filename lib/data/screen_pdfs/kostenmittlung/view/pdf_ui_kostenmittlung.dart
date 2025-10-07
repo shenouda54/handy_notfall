@@ -61,7 +61,7 @@ Future<pw.Widget> buildPdfContent(
                     pw.Text('Geräte-Typ: ${data['deviceType']}',
                         style: pw.TextStyle(
                             fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                    pw.Text(" , "),
+                    pw.Text(" "),
                     pw.Text('${data['deviceModel']}',
                         style: pw.TextStyle(
                             fontSize: 12, fontWeight: pw.FontWeight.bold)),
@@ -132,7 +132,7 @@ Future<pw.Widget> buildPdfContent(
             width: 180,
             child: pw.Text(
               '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage.',
-              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
               softWrap: true,
             ),
           ),
