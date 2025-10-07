@@ -19,7 +19,8 @@ class SaveCustomerDataUseCase {
       price: entity.price,
       startDate: entity.startDate,
       endDate: entity.endDate,
-      isDone: entity.isDone, userEmail: '',
+      isDone: entity.isDone, 
+      userEmail: entity.userEmail,
     );
 
     await CustomerService.saveCustomer(model);

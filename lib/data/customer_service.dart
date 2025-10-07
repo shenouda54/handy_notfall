@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:handy_notfall/firebase_function.dart';
 import 'package:handy_notfall/models/customer_model.dart';
+import 'package:handy_notfall/data/print_pdf/customer_number/view_model/customer_numbering_logic.dart';
 
 class CustomerService {
   static Future<void> saveCustomer(CustomerModel model) async {
@@ -12,42 +12,28 @@ class CustomerService {
       }
       
       model.userEmail = userEmail;
-
-      final allowAutoNumbering = userEmail == "handynotfall@web.de";
-
-      // Check if customer already has printId
-      final snapshot = await FirebaseFirestore.instance
-          .collection('Customers')
-          .where('customerFirstName', isEqualTo: model.customerFirstName)
-          .where('phoneNumber', isEqualTo: model.phoneNumber)
-          .get();
-
-      // If customer already has printId, use the same one
-      if (snapshot.docs.isNotEmpty && snapshot.docs.first.data().containsKey('printId')) {
-        final existingPrintId = snapshot.docs.first['printId'];
-        model.printId = existingPrintId;
-      }
-      // If not numbered and account allows auto numbering
-      else if (allowAutoNumbering) {
-        final last = await FirebaseFirestore.instance
-            .collection('Customers')
-            .orderBy('printId', descending: true)
-            .limit(1)
-            .get();
-
-        int newPrintId = 2025670;
-        if (last.docs.isNotEmpty && last.docs.first.data().containsKey('printId')) {
-          newPrintId = last.docs.first['printId'] + 1;
-        }
-
-        model.printId = newPrintId;
-      }
-
-      // Final save
+      
+      // أولاً: نحفظ الجهاز الجديد بدون auftragNr
+      model.auftragNr = null;
+      model.kundennummer = null;
+      
+      // حفظ الجهاز في قاعدة البيانات
       await FirebaseFireStore.addCustomer(model);
+      
+      // ثانياً: نستدعي نظام الترقيم لتحديث جميع أجهزة العميل
+      final numberingResult = await CustomerNumberingService.assignCustomerNumber(
+        model.customerFirstName, 
+        model.phoneNumber
+      );
+      
+      if (!numberingResult['success']) {
+        print("⚠️ تحذير: فشل في الترقيم التلقائي");
+      }
+      
     } catch (e) {
       print("❌ Error in saveCustomer: $e");
       throw Exception('Failed to save customer: $e');
     }
   }
+
 }

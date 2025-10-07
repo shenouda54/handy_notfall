@@ -63,6 +63,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
 
   final List<String> selectedIssues = [];
   bool _isLoading = true;
+  bool _isSaving = false; // متغير للتحكم في حالة الحفظ
 
 
 
@@ -200,14 +201,25 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  onPressed: () async {
+                  onPressed: _isSaving ? null : () async {
+                    // منع الضغط المتكرر
+                    if (_isSaving) return;
+                    
+                    setState(() {
+                      _isSaving = true;
+                    });
+
                     String? userEmail = FirebaseAuth.instance.currentUser?.email;
                     if (userEmail == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Sie müssen sich zuerst anmelden!')),
                       );
+                      setState(() {
+                        _isSaving = false;
+                      });
                       return;
                     }
+                    
                     try {
                       final entity = CustomerDataEntity(
                         customerFirstName: widget.firstName.trim(),
@@ -244,12 +256,35 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Daten konnten nicht gespeichert werden: $e')),
                       );
+                    } finally {
+                      setState(() {
+                        _isSaving = false;
+                      });
                     }
                   },
-                  child: const Text(
-                    'Speicher Daten',
-                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+                  child: _isSaving 
+                    ? const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Text(
+                            'Speichert...',
+                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ],
+                      )
+                    : const Text(
+                        'Speicher Daten',
+                        style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
                 ),
               ),
             ],

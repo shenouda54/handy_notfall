@@ -18,7 +18,8 @@ Future<bool> requestStoragePermission() async {
   return true;
 }
 
-Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, String auftragNr) async {
+Future<void> generatePdf(
+    Map<String, dynamic> data, BuildContext context, String auftragNr) async {
   try {
     final pdf = pw.Document();
     final pdfPageContent = await buildPdfContent(data, auftragNr);

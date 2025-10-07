@@ -120,7 +120,7 @@ Future<pw.Widget> buildPdfContent(
           pw.Container(
             width: 180,
             child: pw.Text(
-              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage.',
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} .',
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
               softWrap: true,
             ),

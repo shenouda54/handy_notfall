@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:handy_notfall/service/customer_number_service.dart' as CustomerService;
-import 'package:handy_notfall/service/auftrag_number_service.dart';
 
 class CustomerNumberingService {
   static Future<Map<String, dynamic>> assignCustomerNumber(String customerName, String customerPhone) async {
@@ -48,33 +46,49 @@ class CustomerNumberingService {
       }
     }
     
-    // البحث عن آخر auftragNr للمستخدم الحالي (بدون orderBy لتجنب الحاجة لفهرس)
+    // البحث عن آخر auftragNr للمستخدم الحالي فقط للسنة الحالية
+    final currentYear = DateTime.now().year;
+    final yearSuffix = currentYear.toString().substring(3); // أخذ آخر رقم واحد من السنة (مثل 2025 → 5)
     final auftragNrSnapshot = await FirebaseFirestore.instance
         .collection('Customers')
-        .where('userEmail', isEqualTo: userEmail)
+        .where('userEmail', isEqualTo: userEmail) // البحث فقط في أجهزة المستخدم الحالي
         .get();
     
     int newAuftragNr = 1;
+    int maxAuftragNr = 0;
+    
+    print("🔍 البحث عن auftragNr للسنة: $yearSuffix للمستخدم: $userEmail");
+    print("📊 عدد الأجهزة للمستخدم الحالي: ${auftragNrSnapshot.docs.length}");
+    print("🔍 الإيميل الحالي: $userEmail");
+    
     if (auftragNrSnapshot.docs.isNotEmpty) {
-      int maxAuftragNr = 0;
       for (final doc in auftragNrSnapshot.docs) {
         final data = doc.data();
+        print("🔍 فحص جهاز - userEmail: ${data['userEmail']}, auftragNr: ${data['auftragNr']}");
+        
         if (data.containsKey('auftragNr')) {
           final auftragNr = data['auftragNr'];
-          if (auftragNr is String) {
-            // إذا كان auftragNr نص، نستخرج الرقم منه
+          print("🔍 وجد auftragNr: $auftragNr");
+          
+          if (auftragNr is String && auftragNr.startsWith('$yearSuffix/')) {
+            // إذا كان auftragNr يبدأ بالسنة الحالية، نستخرج الرقم منه
             final match = RegExp(r'(\d+)$').firstMatch(auftragNr);
             if (match != null) {
               final num = int.parse(match.group(1)!);
-              if (num > maxAuftragNr) maxAuftragNr = num;
+              print("🔢 استخرج الرقم: $num من $auftragNr");
+              if (num > maxAuftragNr) {
+                maxAuftragNr = num;
+                print("✅ تحديث maxAuftragNr إلى: $maxAuftragNr");
+              }
             }
-          } else if (auftragNr is int) {
-            if (auftragNr > maxAuftragNr) maxAuftragNr = auftragNr;
           }
         }
       }
       newAuftragNr = maxAuftragNr + 1;
     }
+    
+    print("🔍 آخر auftragNr موجود: $maxAuftragNr");
+    print("🔢 الرقم الجديد سيبدأ من: $newAuftragNr");
     
     // تحديث كل الأجهزة مع الأرقام الجديدة
     List<Map<String, dynamic>> updatedDevices = [];
@@ -85,16 +99,25 @@ class CustomerNumberingService {
       // فحص إذا كان الجهاز له auftragNr من قبل
       if (data.containsKey('auftragNr') && data['auftragNr'] != null && data['auftragNr'].toString().isNotEmpty) {
         existingAuftragNr = data['auftragNr'].toString();
+        print("📱 الجهاز له auftragNr موجود: $existingAuftragNr");
+      } else {
+        print("📱 الجهاز بدون auftragNr");
       }
       
       String finalAuftragNr;
-      if (existingAuftragNr != null) {
-        // الجهاز موجود من قبل، نستخدم نفس auftragNr
+      // إذا كان الجهاز له auftragNr صحيح للسنة الحالية، نستخدمه
+      if (existingAuftragNr != null && 
+          existingAuftragNr.startsWith('$yearSuffix/') && 
+          existingAuftragNr.isNotEmpty &&
+          existingAuftragNr != '$yearSuffix/0') {
+        // الجهاز له auftragNr صحيح، نستخدمه
         finalAuftragNr = existingAuftragNr;
+        print("✅ استخدام auftragNr موجود: $finalAuftragNr");
       } else {
-        // الجهاز جديد، نولد auftragNr جديد
-        finalAuftragNr = newAuftragNr.toString();
-        newAuftragNr++;
+        // الجهاز جديد أو بدون auftragNr صحيح، نولد auftragNr جديد للسنة الحالية
+        finalAuftragNr = '$yearSuffix/$newAuftragNr';
+        print("🆕 جهاز جديد يحصل على auftragNr: $finalAuftragNr");
+        newAuftragNr++; // زيادة الرقم للجهاز التالي
       }
       
       // تحديث الجهاز في قاعدة البيانات

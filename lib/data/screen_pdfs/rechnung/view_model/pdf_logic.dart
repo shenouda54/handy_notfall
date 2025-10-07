@@ -52,7 +52,7 @@ Future<void> generatePdf(Map<String, dynamic> data, BuildContext context, String
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("✅ PDF saved as $fileName")),
       );
-      await OpenFile.open(file.path); // إرجاع فتح الملف تلقائياً
+      await OpenFile.open(file.path);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("❌ Failed to save PDF")),
