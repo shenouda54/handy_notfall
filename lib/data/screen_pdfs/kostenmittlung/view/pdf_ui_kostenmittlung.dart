@@ -70,7 +70,7 @@ Future<pw.Widget> buildPdfContent(
                 pw.Text('IMEL: ${data['serialNumber']}',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Sperre Code: ${data['pinCode']}',
+                pw.Text('Sperrcode: ${data['pinCode']}',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 40),
@@ -131,7 +131,7 @@ Future<pw.Widget> buildPdfContent(
           pw.Container(
             width: 180,
             child: pw.Text(
-              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage.',
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage',
               style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
               softWrap: true,
             ),

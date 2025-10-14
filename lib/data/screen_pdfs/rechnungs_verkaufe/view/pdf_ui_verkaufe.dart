@@ -4,7 +4,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<pw.Widget> buildPdfContent(
-    Map<String, dynamic> data, String auftragNr) async {
+  Map<String, dynamic> data,
+  String auftragNr,
+) async {
   final ByteData bytes = await rootBundle.load('assets/images/pdf.png');
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
@@ -13,13 +15,15 @@ Future<pw.Widget> buildPdfContent(
   final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2));
   final NumberFormat currencyFormat = NumberFormat('#,##0.00', 'de_DE');
 
-  final serial = int.tryParse(auftragNr.split('/').last) ?? 0;
+  // final serial = int.tryParse(auftragNr.split('/').last) ?? 0;
 
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      pw.Text('HandyNotfall - Breitscheiderstr. 2 - 53547 Roßbach/Wied',
-          style: const pw.TextStyle(fontSize: 11)),
+      pw.Text(
+        'HandyNotfall - Breitscheiderstr. 2 - 53547 Roßbach/Wied',
+        style: const pw.TextStyle(fontSize: 11),
+      ),
       pw.SizedBox(height: 30),
 
       pw.Row(
@@ -30,24 +34,49 @@ Future<pw.Widget> buildPdfContent(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.SizedBox(height: 4),
-                pw.Text('${data['customerFirstName']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${data['city']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${data['address']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${data['phoneNumber']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${data['emailAddress']}',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  '${data['customerFirstName']}',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${data['city']}',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${data['address']}',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${data['phoneNumber']}',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${data['emailAddress']}',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.SizedBox(height: 40),
-                pw.Text('Kundennummer: ${data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر'}',
-                    style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Kundennummer: ${data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر'}',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
                 pw.Text(
                   'Datum: ${DateFormat('dd.MM.yyyy').format((data['startDate'] as Timestamp).toDate())}',
                   style: pw.TextStyle(
@@ -58,19 +87,31 @@ Future<pw.Widget> buildPdfContent(
                 ),
                 pw.Row(
                   children: [
-                    pw.Text('Geräte-Typ: ${data['deviceType']}',
-                        style: pw.TextStyle(
-                            fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      'Geräte-Typ: ${data['deviceType']}',
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                     pw.Text("  "),
-                    pw.Text('${data['deviceModel']}',
-                        style: pw.TextStyle(
-                            fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      '${data['deviceModel']}',
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 pw.SizedBox(height: 40),
-                pw.Text('Rechnung : $auftragNr',
-                    style: pw.TextStyle(
-                        fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Rechnung : $auftragNr',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
@@ -101,15 +142,18 @@ Future<pw.Widget> buildPdfContent(
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text('Beschreibung',
-                style:
-                pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-            pw.Text('Menge',
-                style:
-                pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-            pw.Text('Betrag',
-                style:
-                pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              'Beschreibung',
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.Text(
+              'Menge',
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.Text(
+              'Betrag',
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            ),
           ],
         ),
       ),
@@ -120,7 +164,7 @@ Future<pw.Widget> buildPdfContent(
           pw.Container(
             width: 180,
             child: pw.Text(
-              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} .',
+              '${data['issue']} ${data['deviceType']} ${data['deviceModel']}.',
               style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
               softWrap: true,
             ),
@@ -132,9 +176,10 @@ Future<pw.Widget> buildPdfContent(
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
           ),
-          pw.Text('${currencyFormat.format(tax)} ',
-              style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.Text(
+            '${currencyFormat.format(tax)} ',
+            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+          ),
         ],
       ),
       pw.Divider(thickness: 1),
@@ -150,35 +195,59 @@ Future<pw.Widget> buildPdfContent(
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Nettobetrag',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${currencyFormat.format(tax)} ',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Nettobetrag',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${currencyFormat.format(tax)} ',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Umsatzsteuer 19.00 %',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${currencyFormat.format(grossAmount)} ',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Umsatzsteuer 19.00 %',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${currencyFormat.format(grossAmount)} ',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             pw.Divider(thickness: 1),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Bruttobetrag EUR',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${currencyFormat.format(netAmount)} ',
-                    style: pw.TextStyle(
-                        fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                  'Bruttobetrag EUR',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  '${currencyFormat.format(netAmount)} ',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],
@@ -187,13 +256,19 @@ Future<pw.Widget> buildPdfContent(
 
       pw.SizedBox(height: 50),
 
-      pw.Text('Vielen Dank für ihren Auftrag.',
-          style: const pw.TextStyle(fontSize: 10)),
-      pw.Text('Mit freundlichen Grüßen',
-          style: const pw.TextStyle(fontSize: 10)),
+      pw.Text(
+        'Vielen Dank für ihren Auftrag.',
+        style: const pw.TextStyle(fontSize: 10),
+      ),
+      pw.Text(
+        'Mit freundlichen Grüßen',
+        style: const pw.TextStyle(fontSize: 10),
+      ),
       pw.SizedBox(height: 10),
-      pw.Text('HandyNotfall',
-          style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+      pw.Text(
+        'HandyNotfall',
+        style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+      ),
       pw.Spacer(),
       pw.Divider(thickness: 1),
 
@@ -204,11 +279,14 @@ Future<pw.Widget> buildPdfContent(
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('Zahlungskondition. 7 Tage',
-                    style: const pw.TextStyle(fontSize: 8)),
                 pw.Text(
-                    'Bitte geben Sie bei Zahlung folgende Verwendungszweck an:',
-                    style: const pw.TextStyle(fontSize: 8)),
+                  'Zahlungskondition. 7 Tage',
+                  style: const pw.TextStyle(fontSize: 8),
+                ),
+                pw.Text(
+                  'Bitte geben Sie bei Zahlung folgende Verwendungszweck an:',
+                  style: const pw.TextStyle(fontSize: 8),
+                ),
               ],
             ),
           ),
@@ -217,19 +295,31 @@ Future<pw.Widget> buildPdfContent(
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text('Steuer-Nr. 32/005/55663',
-                    style: const pw.TextStyle(fontSize: 6)),
-                pw.Text('USt-idNr. DE359650128',
-                    style: const pw.TextStyle(fontSize: 6)),
+                pw.Text(
+                  'Steuer-Nr. 32/005/55663',
+                  style: const pw.TextStyle(fontSize: 6),
+                ),
+                pw.Text(
+                  'USt-idNr. DE359650128',
+                  style: const pw.TextStyle(fontSize: 6),
+                ),
                 pw.SizedBox(height: 4),
-                pw.Text('Bankverbindung',
-                    style: const pw.TextStyle(fontSize: 6)),
-                pw.Text('Sparkasse Neuwied',
-                    style: const pw.TextStyle(fontSize: 6)),
-                pw.Text('BIC MALADE51NWD',
-                    style: const pw.TextStyle(fontSize: 6)),
-                pw.Text('IBAN DE06 5745 0120 0030 5166 78',
-                    style: const pw.TextStyle(fontSize: 6)),
+                pw.Text(
+                  'Bankverbindung',
+                  style: const pw.TextStyle(fontSize: 6),
+                ),
+                pw.Text(
+                  'Sparkasse Neuwied',
+                  style: const pw.TextStyle(fontSize: 6),
+                ),
+                pw.Text(
+                  'BIC MALADE51NWD',
+                  style: const pw.TextStyle(fontSize: 6),
+                ),
+                pw.Text(
+                  'IBAN DE06 5745 0120 0030 5166 78',
+                  style: const pw.TextStyle(fontSize: 6),
+                ),
               ],
             ),
           ),
