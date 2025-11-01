@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/customer_data_telpone_entity.dart';
 import 'package:handy_notfall/service/issue_storage_service.dart';
 import 'package:handy_notfall/service/storage_service.dart';
+import 'package:handy_notfall/service/auftrag_pdf_service.dart';
 
 class DataTelponeScreen extends StatefulWidget {
   final String firstName;
@@ -246,6 +247,12 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       );
 
                       await SaveCustomerDataUseCase().execute(entity);
+
+                      // طباعة وفتح PDF للـ Auftrag بالبيانات الحالية
+                      await AuftragPdfService.generateAndPrintAuftrag(
+                        context: context,
+                        entity: entity,
+                      );
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Datei gespeichert!')),

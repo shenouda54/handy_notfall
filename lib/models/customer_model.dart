@@ -17,7 +17,7 @@ class CustomerModel {
   Timestamp endDate;
   bool isDone;
   String userEmail;
-  int? printId; // ✅ أضفنا printId
+  int? printId;
   int? kundennummer; // رقم العميل
   String? auftragNr; // رقم الطلب
 
@@ -35,7 +35,7 @@ class CustomerModel {
     required this.pinCode,
     required this.price,
     required this.userEmail,
-    this.printId, // ✅ هنا
+    this.printId,
     this.kundennummer, // رقم العميل
     this.auftragNr, // رقم الطلب
     Timestamp? startDate,
@@ -62,7 +62,7 @@ class CustomerModel {
       startDate: json['startDate'] != null ? json['startDate'] as Timestamp : Timestamp.now(),
       endDate: json['endDate'] != null ? json['endDate'] as Timestamp : Timestamp.now(),
       isDone: json['isDone'] ?? false,
-      printId: json['printId'], // ✅ ناخده كمان من الفايرستور
+      printId: json['printId'],
       kundennummer: json['kundennummer'], // رقم العميل
       auftragNr: json['auftragNr'], // رقم الطلب
     );
@@ -86,7 +86,7 @@ class CustomerModel {
       "endDate": endDate,
       "isDone": isDone,
       "userEmail": userEmail,
-      "printId": printId, // ✅ نحفظه مع البيانات
+      "printId": printId,
       "kundennummer": kundennummer, // رقم العميل
       "auftragNr": auftragNr, // رقم الطلب
     };
