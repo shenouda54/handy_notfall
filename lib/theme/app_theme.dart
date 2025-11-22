@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Brand Colors
-  static const Color primaryColor = Color(0xFFB71C1C); // Darker Red (Burgundy) - Classy & Easy on eyes
+  static const Color primaryColor = Color(0xFFB71C1C); // Darker Red (Burgundy)
   static const Color secondaryColor = Color(0xFFD32F2F); // Slightly lighter red for accents
-  
-  // Dark Theme Colors
   static const Color darkBackground = Color(0xFF000000);
   static const Color darkSurface = Color(0xFF1E1E1E);
   static const Color darkText = Colors.white;
-  
-  // Light Theme Colors
   static const Color lightBackground = Color(0xFFF5F5F5);
   static const Color lightSurface = Colors.white;
   static const Color lightText = Color(0xFF212121);
 
-  // ================= DARK THEME =================
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -69,7 +63,6 @@ class AppTheme {
     );
   }
 
-  // ================= LIGHT THEME =================
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,

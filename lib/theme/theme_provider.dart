@@ -8,8 +8,7 @@ class ThemeProvider extends ChangeNotifier {
 
   bool get isDarkMode {
     if (_themeMode == ThemeMode.system) {
-      // If system, we can't easily know without context, but usually we default to dark for this app
-      return true; 
+      return true;
     }
     return _themeMode == ThemeMode.dark;
   }
