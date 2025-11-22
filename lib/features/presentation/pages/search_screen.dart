@@ -61,6 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
           "city": doc["city"] ?? "",
           "email": doc["emailAddress"] ?? "",
           "id": doc.id,
+          "auftragNr": doc.data().toString().contains('auftragNr') ? doc['auftragNr'] : null,
         };
       }).toList();
 

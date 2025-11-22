@@ -29,22 +29,18 @@ class CustomerDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FutureBuilder<DocumentSnapshot>(
       future: fetchCustomerDetails(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasError) {
           return CustomErrorWidget(
             errorMessage: snapshot.error.toString(),
-            onRetry: () {
-              // Force rebuild to retry
-              (context as Element).markNeedsBuild();
-            },
+            onRetry: () => (context as Element).markNeedsBuild(),
             onGoBack: () => Navigator.pop(context),
           );
         }
@@ -79,111 +75,41 @@ class CustomerDetailsScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: Padding(
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: ListView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                detailDoubleRow('Kundennummer', data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر', 'Auftrag Nr ', data['auftragNr']?.toString() ?? 'غير مرقّم'),
-                detailRow('Name', data['customerFirstName']),
-                detailRow('Stadt', data['city']),
-                detailRow('Adresse', data['address']),
-                detailRow('Handynummer', data['phoneNumber']),
-                detailRow('E-Mail', data['emailAddress']),
-                detailRow('Model', '${data['deviceType']} ${data['deviceModel']}'),
-                detailRow('Seriennummer', data['serialNumber']),
-                detailRow('PIN code', data['pinCode']),
-                detailRow('Problem', data['issue']),
-                detailRow('Preis', "${data['price']} €"),
-                detailRow(
-                  'Startdatum',
-                  DateFormat('dd.MM.yyyy')
-                      .format((data['startDate'] as Timestamp).toDate()),
-                ),
-                detailRow(
-                  'Enddatum',
-                  DateFormat('dd-MM-yyyy').format
-                    ((data['endDate'] as Timestamp)
-                      .toDate())
-                ),
-                // detailRow('Status', data['isDone'] ? 'Done' : 'In Progress'),
+                _buildHeader(data, theme),
+                const SizedBox(height: 24),
+                
+                _buildSectionTitle('Kundeninformationen', Icons.person, theme),
+                _buildInfoCard([
+                  _buildDetailRow(Icons.location_on, 'Adresse', '${data['address']}, ${data['city']}', theme),
+                  _buildDetailRow(Icons.phone, 'Handy', data['phoneNumber'], theme),
+                  _buildDetailRow(Icons.email, 'E-Mail', data['emailAddress'], theme),
+                ], theme),
                 const SizedBox(height: 20),
+                
+                _buildSectionTitle('Geräteinformationen', Icons.phone_android, theme),
+                _buildInfoCard([
+                  _buildDetailRow(Icons.smartphone, 'Modell', '${data['deviceType']} ${data['deviceModel']}', theme),
+                  _buildDetailRow(Icons.qr_code, 'Seriennummer', data['serialNumber'], theme),
+                  _buildDetailRow(Icons.lock, 'PIN Code', data['pinCode'], theme),
+                  _buildDetailRow(Icons.build, 'Problem', data['issue'], theme),
+                ], theme),
                 const SizedBox(height: 20),
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 2 - 24,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (data.containsKey('auftragNr')) {
-                          final auftragNr = data['auftragNr']?.toString() ?? '';
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AuftragScreen(customerId: customerId, auftragNr: auftragNr),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا."),
-                            ),
-                          );
-                        }
-                      },
-                      child: const Text('Auftrag'),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: [
-                    {
-                      'label': 'Rechnung',
-                      'screen': (String id, String auftragNr) =>
-                          RechnungScreen(customerId: id, auftragNr: auftragNr),
-                    },
-                    {
-                      'label': 'Verkaufe',
-                      'screen': (String id, String auftragNr) =>
-                          RechnungVerkaufeScreen(customerId: id, auftragNr: auftragNr),
-                    },
-                    {
-                      'label': 'Gebraucht Handy',
-                      'screen': (String id, String auftragNr) =>
-                          RechnungHandyScreen(customerId: id, auftragNr: auftragNr),
-                    },
-                    {
-                      'label': 'Kostenmittlung',
-                      'screen': (String id, String auftragNr) =>
-                          KostenmittlungScreen(customerId: id, auftragNr: auftragNr),
-                    },
-                  ].map((item) {
-                    return SizedBox(
-                      width: MediaQuery.of(context).size.width / 2 - 24,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (data.containsKey('auftragNr')) {
-                            final auftragNr = data['auftragNr']?.toString() ?? '';
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => (item['screen'] as Widget Function(String, String))(customerId, auftragNr),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا."),
-                              ),
-                            );
-                          }
-                        },
-                        child: Text(item['label'] as String),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                
+                _buildSectionTitle('Auftragsdetails', Icons.assignment, theme),
+                _buildInfoCard([
+                  _buildDetailRow(Icons.euro, 'Preis', "${data['price']} €", theme),
+                  _buildDetailRow(Icons.calendar_today, 'Startdatum', DateFormat('dd.MM.yyyy').format((data['startDate'] as Timestamp).toDate()), theme),
+                  _buildDetailRow(Icons.event, 'Enddatum', DateFormat('dd.MM.yyyy').format((data['endDate'] as Timestamp).toDate()), theme),
+                ], theme),
+                
+                const SizedBox(height: 30),
+                _buildActionButtons(context, data, customerId, theme),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -192,36 +118,105 @@ class CustomerDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget detailRow(String title, String value) {
+  Widget _buildHeader(Map<String, dynamic> data, ThemeData theme) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: theme.primaryColor,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.white,
+              child: Text(
+                (data['customerFirstName'] as String).isNotEmpty ? data['customerFirstName'][0].toUpperCase() : '?',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.primaryColor),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data['customerFirstName'],
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Auftrag Nr: ${data['auftragNr'] ?? 'N/A'}',
+                    style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '#${data.containsKey('kundennummer') ? data['kundennummer'] : '-'}',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.only(left: 8, bottom: 8),
       child: Row(
         children: [
-          Text("$title: ", style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value)),
+          Icon(icon, size: 20, color: theme.primaryColor),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color),
+          ),
         ],
       ),
     );
   }
-  Widget detailDoubleRow(String title1, String value1, String title2, String value2) {
+
+  Widget _buildInfoCard(List<Widget> children, ThemeData theme) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(children: children),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String? value, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Expanded(
-            child: Row(
-              children: [
-                Text("$title1: ", style: const TextStyle(fontWeight: FontWeight.bold)),
-                Expanded(child: Text(value1)),
-              ],
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
+            child: Icon(icon, size: 20, color: theme.primaryColor),
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("$title2: ", style: const TextStyle(fontWeight: FontWeight.bold)),
-                Expanded(child: Text(value2)),
+                Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text(value ?? '-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -230,4 +225,66 @@ class CustomerDetailsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildActionButtons(BuildContext context, Map<String, dynamic> data, String customerId, ThemeData theme) {
+    void navigateTo(Widget screen) {
+       if (data.containsKey('auftragNr')) {
+          final auftragNr = data['auftragNr']?.toString() ?? '';
+          Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+       } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا.")));
+       }
+    }
+
+    final auftragNr = data['auftragNr']?.toString() ?? '';
+
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: ElevatedButton.icon(
+            onPressed: () => navigateTo(AuftragScreen(customerId: customerId, auftragNr: auftragNr)),
+            icon: const Icon(Icons.assignment_turned_in),
+            label: const Text('Auftrag erstellen', style: TextStyle(fontSize: 18)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 2.2,
+          children: [
+             _buildActionButton(context, 'Rechnung', Icons.receipt, () => navigateTo(RechnungScreen(customerId: customerId, auftragNr: auftragNr)), theme),
+             _buildActionButton(context, 'Verkaufe', Icons.sell, () => navigateTo(RechnungVerkaufeScreen(customerId: customerId, auftragNr: auftragNr)), theme),
+             _buildActionButton(context, 'Gebraucht', Icons.phone_iphone, () => navigateTo(RechnungHandyScreen(customerId: customerId, auftragNr: auftragNr)), theme),
+             _buildActionButton(context, 'Kosten', Icons.euro, () => navigateTo(KostenmittlungScreen(customerId: customerId, auftragNr: auftragNr)), theme),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, String label, IconData icon, VoidCallback onPressed, ThemeData theme) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18, color: theme.primaryColor),
+      label: Text(label, style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontSize: 13, fontWeight: FontWeight.bold)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.cardTheme.color,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade300)),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
+    );
+  }
 }

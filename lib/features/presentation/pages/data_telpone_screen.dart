@@ -119,7 +119,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daten'),
-        backgroundColor: Colors.blue,
+
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -195,13 +195,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               // add new dart file logic
               Center(
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
+
                   onPressed: _isSaving ? null : () async {
                     // منع الضغط المتكرر
                     if (_isSaving) return;
@@ -284,13 +278,13 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                           SizedBox(width: 12),
                           Text(
                             'Speichert...',
-                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                           ),
                         ],
                       )
                     : const Text(
                         'Speicher Daten',
-                        style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
                 ),
               ),

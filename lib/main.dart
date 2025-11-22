@@ -10,6 +10,10 @@ import 'features/presentation/pages/customer_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
 import 'data/error_widget.dart';
 
+import 'package:provider/provider.dart';
+import 'theme/theme_provider.dart';
+import 'theme/app_theme.dart';
+
 void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +49,12 @@ void main() {
       print("❌ Firebase initialization failed: $e");
     }
 
-    runApp(const MyApp());
+    runApp(
+      ChangeNotifierProvider(
+        create: (_) => ThemeProvider(),
+        child: const MyApp(),
+      ),
+    );
   }, (error, stack) {
     // ignore: avoid_print
     print('❌ Uncaught error: $error');
@@ -57,10 +66,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Handy Notfall',
-      home: AuthGate(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Handy Notfall',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          home: const AuthGate(),
+        );
+      },
     );
   }
 }

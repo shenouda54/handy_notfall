@@ -80,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 16),
             if (errorMessage != null)
-              Text(errorMessage!, style: const TextStyle(color: Colors.red)),
+              Text(errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             const SizedBox(height: 24),
             isLoading
                 ? const CircularProgressIndicator()

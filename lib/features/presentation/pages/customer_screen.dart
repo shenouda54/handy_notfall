@@ -6,6 +6,8 @@ import 'package:handy_notfall/features/presentation/pages/search_screen.dart';
 
 import '../../../data/custom_input_field.dart';
 import '../../auth/presentation/login/login.dart';
+import 'package:provider/provider.dart';
+import '../../../../theme/theme_provider.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});
@@ -53,7 +55,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+
         title: !isSearching
             ? const Text('Kunden Daten')
             : TextField(
@@ -69,6 +71,16 @@ class _CustomerScreenState extends State<CustomerScreen> {
           },
         ),
         actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+                onPressed: () {
+                  themeProvider.toggleTheme(!themeProvider.isDarkMode);
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {

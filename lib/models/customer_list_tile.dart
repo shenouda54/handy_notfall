@@ -51,7 +51,7 @@ class CustomerListTile extends StatelessWidget {
             spacing: 8,
             children: [
               IconButton(
-                icon: const Icon(Icons.add, color: Colors.orange),
+                icon: Icon(Icons.add, color: Theme.of(context).primaryColor),
                 tooltip: 'Add New Device',
                 onPressed: () async {
                   final result = await Navigator.push(
@@ -72,7 +72,7 @@ class CustomerListTile extends StatelessWidget {
                 }
               ),
               IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
+                icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary),
                 onPressed: () async{
                   final result = await Navigator.push(
                     context,
@@ -88,7 +88,7 @@ class CustomerListTile extends StatelessWidget {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.visibility, color: Colors.green),
+                icon: Icon(Icons.visibility, color: Theme.of(context).colorScheme.secondary),
                 onPressed: () {
                   Navigator.push(
                     context,
