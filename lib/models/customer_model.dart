@@ -13,6 +13,7 @@ class CustomerModel {
   String serialNumber;
   String pinCode;
   int price;
+  int quantity;
   Timestamp startDate;
   Timestamp endDate;
   bool isDone;
@@ -34,6 +35,7 @@ class CustomerModel {
     required this.serialNumber,
     required this.pinCode,
     required this.price,
+    this.quantity = 1,
     required this.userEmail,
     this.printId,
     this.kundennummer, // رقم العميل
@@ -58,6 +60,7 @@ class CustomerModel {
       serialNumber: json['serialNumber'],
       pinCode: json['pinCode'],
       price: json['price'],
+      quantity: json['quantity'] ?? 1,
       userEmail: json['userEmail'] ?? '',
       startDate: json['startDate'] != null ? json['startDate'] as Timestamp : Timestamp.now(),
       endDate: json['endDate'] != null ? json['endDate'] as Timestamp : Timestamp.now(),
@@ -82,6 +85,7 @@ class CustomerModel {
       "serialNumber": serialNumber,
       "pinCode": pinCode,
       "price": price,
+      "quantity": quantity,
       "startDate": startDate,
       "endDate": endDate,
       "isDone": isDone,

@@ -12,6 +12,7 @@ class CustomerDataEntity {
   final String pinCode;
   final String issue;
   final int price;
+  final int quantity;
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isDone;
@@ -29,6 +30,7 @@ class CustomerDataEntity {
     required this.pinCode,
     required this.issue,
     required this.price,
+    required this.quantity,
     required this.startDate,
     required this.endDate,
     required this.isDone,

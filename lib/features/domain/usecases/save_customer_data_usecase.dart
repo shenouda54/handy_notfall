@@ -17,6 +17,7 @@ class SaveCustomerDataUseCase {
       pinCode: entity.pinCode,
       issue: entity.issue,
       price: entity.price,
+      quantity: entity.quantity,
       startDate: entity.startDate,
       endDate: entity.endDate,
       isDone: entity.isDone, 

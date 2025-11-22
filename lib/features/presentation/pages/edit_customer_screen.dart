@@ -21,6 +21,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   final TextEditingController serialNumberController = TextEditingController();
   final TextEditingController pinCodeController = TextEditingController();
   final TextEditingController repairPriceController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController customIssueController = TextEditingController();
@@ -79,6 +80,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
         serialNumberController.text = data['serialNumber'] ?? '';
         pinCodeController.text = data['pinCode'] ?? '';
         repairPriceController.text = data['price'].toString();
+        quantityController.text = (data['quantity'] ?? 1).toString();
         selectedDeviceTypes = (data['deviceType'] as String)
             .split(', ')
             .where((e) => e.isNotEmpty)
@@ -129,6 +131,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
         'pinCode': pinCodeController.text.trim(),
         'issue': selectedIssues.join(', '),
         'price': int.tryParse(repairPriceController.text.trim()) ?? 0,
+        'quantity': int.tryParse(quantityController.text.trim()) ?? 1,
         'startDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text)),
         'endDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(endDateController.text)),
       });
@@ -220,6 +223,12 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               CustomInputField(
                 controller: repairPriceController,
                 label: ' Reparatur Preis ',
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 12),
+              CustomInputField(
+                controller: quantityController,
+                label: ' Menge ',
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 12),

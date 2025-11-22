@@ -39,6 +39,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final TextEditingController serialNumberController = TextEditingController();
   final TextEditingController pinCodeController = TextEditingController();
   final TextEditingController repairPriceController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController(text: '1');
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController customIssueController = TextEditingController();
@@ -108,6 +109,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     modelController.dispose();
     deviceTypesController.dispose();
     repairPriceController.dispose();
+    quantityController.dispose();
     startDateController.dispose();
     endDateController.dispose();
     customIssueController.dispose();
@@ -188,6 +190,12 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16.0),
+              CustomInputField(
+                controller: quantityController,
+                label: 'Menge *',
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16.0),
               DatePickerField(controller: startDateController, label: 'Anfang *'),
               const SizedBox(height: 16.0),
               DatePickerField(controller: endDateController, label: 'Abholung *'),
@@ -230,6 +238,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                             ? selectedIssues.join(', ')
                             : 'No Issues',
                         price: int.tryParse(repairPriceController.text.trim()) ?? 0,
+                        quantity: int.tryParse(quantityController.text.trim()) ?? 1,
                         startDate: startDateController.text.isNotEmpty
                             ? Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text.trim()))
                             : Timestamp.now(),
