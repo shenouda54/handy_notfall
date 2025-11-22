@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:handy_notfall/features/auth/presentation/login/signup.dart';
 
 import 'package:provider/provider.dart';
-import '../../../../theme/theme_provider.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../presentation/pages/customer_screen.dart';
 
 class LoginScreen extends StatefulWidget {

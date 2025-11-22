@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:handy_notfall/data/custom_input_field.dart';
-import 'package:handy_notfall/data/date_picker_field.dart';
-import 'package:handy_notfall/data/issue_selection.dart';
-import 'package:handy_notfall/data/device_type_selection.dart';
+import 'package:handy_notfall/core/widgets/custom_input_field.dart';
+import 'package:handy_notfall/core/widgets/date_picker_field.dart';
+import 'package:handy_notfall/core/widgets/issue_selection.dart';
+import 'package:handy_notfall/core/widgets/device_type_selection.dart';
 import 'package:intl/intl.dart';
 
 class EditCustomerScreen extends StatefulWidget {

@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:handy_notfall/firebase_function.dart';
 import 'package:handy_notfall/models/customer_model.dart';
-import 'package:handy_notfall/data/print_pdf/customer_number/view_model/customer_numbering_logic.dart';
+
+import '../data/datasources/print_pdf/customer_number/view_model/customer_numbering_logic.dart';
 
 class CustomerService {
   static Future<void> saveCustomer(CustomerModel model) async {

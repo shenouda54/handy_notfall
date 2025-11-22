@@ -4,10 +4,10 @@ import 'package:handy_notfall/features/domain/entities/customer_entity.dart';
 import 'package:handy_notfall/features/domain/usecases/go_to_data_screen_usecase.dart';
 import 'package:handy_notfall/features/presentation/pages/search_screen.dart';
 
-import '../../../data/custom_input_field.dart';
+import '../../../core/theme/theme_provider.dart';
+import '../../../core/widgets/custom_input_field.dart';
 import '../../auth/presentation/login/login.dart';
 import 'package:provider/provider.dart';
-import '../../../../theme/theme_provider.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});

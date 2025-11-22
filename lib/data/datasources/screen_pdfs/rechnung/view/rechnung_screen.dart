@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:handy_notfall/data/screen_pdfs/rechnung/view_model/pdf_logic.dart';
-import 'package:handy_notfall/data/error_widget.dart';
+import 'package:handy_notfall/core/widgets/error_widget.dart';
+
+import 'package:handy_notfall/data/datasources/screen_pdfs/rechnung/view_model/pdf_logic.dart';
 
 class RechnungScreen extends StatelessWidget {
   final String customerId;

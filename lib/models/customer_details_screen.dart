@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/print_pdf/customer_number/view/customer_numbering_screen.dart';
-import 'package:handy_notfall/data/error_widget.dart';
+import 'package:handy_notfall/core/widgets/error_widget.dart';
 import 'package:intl/intl.dart';
 
-import '../data/screen_pdfs/auftrag/view/auftrag_screen.dart';
-import '../data/screen_pdfs/kostenmittlung/view/kostenmittlung_screen.dart';
-import '../data/screen_pdfs/rechnung/view/rechnung_screen.dart';
-import '../data/screen_pdfs/rechnung_handy/view/rechnung_handy_screen.dart';
-import '../data/screen_pdfs/rechnungs_verkaufe/view/rechnungs_verkaufe_screen.dart';
+import '../data/datasources/print_pdf/customer_number/view/customer_numbering_screen.dart';
+import '../data/datasources/screen_pdfs/auftrag/view/auftrag_screen.dart';
+import '../data/datasources/screen_pdfs/kostenmittlung/view/kostenmittlung_screen.dart';
+import '../data/datasources/screen_pdfs/rechnung/view/rechnung_screen.dart';
+import '../data/datasources/screen_pdfs/rechnung_handy/view/rechnung_handy_screen.dart';
+import '../data/datasources/screen_pdfs/rechnungs_verkaufe/view/rechnungs_verkaufe_screen.dart';
+
 
 class CustomerDetailsScreen extends StatelessWidget {
   final String customerId;

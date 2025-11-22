@@ -4,15 +4,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'firebase_options.dart';
 import 'features/auth/presentation/login/login.dart';
 import 'features/presentation/pages/customer_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
-import 'data/error_widget.dart';
+import 'core/widgets/error_widget.dart';
 
 import 'package:provider/provider.dart';
-import 'theme/theme_provider.dart';
-import 'theme/app_theme.dart';
 
 void main() {
   runZonedGuarded(() async {

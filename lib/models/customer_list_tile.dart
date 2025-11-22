@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:handy_notfall/models/customer_details_screen.dart';
 import 'package:handy_notfall/features/presentation/pages/edit_customer_screen.dart';
 
+import '../data/datasources/screen_pdfs/auftrag/view_model/pdf_logic.dart';
 import '../features/presentation/pages/data_telpone_screen.dart';
-import 'package:handy_notfall/data/screen_pdfs/auftrag/view_model/pdf_logic.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomerListTile extends StatelessWidget {

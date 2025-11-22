@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/screen_pdfs/rechnung_handy/view_model/pdf_logic.dart';
+import 'package:handy_notfall/data/datasources/screen_pdfs/rechnungs_verkaufe/view_model/pdf_logic.dart';
 
-class RechnungHandyScreen extends StatelessWidget {
+class RechnungVerkaufeScreen extends StatelessWidget {
   final String customerId;
   final String auftragNr;
 
-  const RechnungHandyScreen({
+  const RechnungVerkaufeScreen({
     super.key,
     required this.customerId,
     required this.auftragNr,
@@ -26,7 +26,7 @@ class RechnungHandyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("RechnungHandy")),
+      appBar: AppBar(title: const Text("RechnungVerkaufe")),
       body: FutureBuilder<Map<String, dynamic>>(
         future: fetchCustomerData(),
         builder: (context, snapshot) {
@@ -45,7 +45,7 @@ class RechnungHandyScreen extends StatelessWidget {
               onPressed: () async {
                 await generatePdf(data, context, auftragNr);
               },
-              child: const Text("📄 Download RechnungHandy PDF"),
+              child: const Text("📄 Download RechnungVerkaufe PDF"),
             ),
           );
         },

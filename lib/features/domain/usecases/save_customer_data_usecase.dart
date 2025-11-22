@@ -1,5 +1,5 @@
 import 'package:handy_notfall/models/customer_model.dart';
-import 'package:handy_notfall/data/customer_service.dart';
+import 'package:handy_notfall/service/customer_service.dart';
 
 import '../entities/customer_data_telpone_entity.dart';
 

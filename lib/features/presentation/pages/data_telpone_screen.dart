@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:handy_notfall/data/custom_input_field.dart';
-import 'package:handy_notfall/data/date_picker_field.dart';
-import 'package:handy_notfall/data/device_type_selection.dart';
-import 'package:handy_notfall/data/issue_selection.dart';
+import 'package:handy_notfall/core/widgets/custom_input_field.dart';
+import 'package:handy_notfall/core/widgets/date_picker_field.dart';
+import 'package:handy_notfall/core/widgets/device_type_selection.dart';
+import 'package:handy_notfall/core/widgets/issue_selection.dart';
 import 'package:handy_notfall/features/domain/usecases/save_customer_data_usecase.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/customer_data_telpone_entity.dart';
