@@ -27,30 +27,70 @@ Future<pw.Widget> buildPdfContent(
       ),
       PdfWidgets.buildTableHeader(),
       pw.SizedBox(height: 6),
-      pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Container(
-            width: 180,
-            child: pw.Text(
-              '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage',
-              style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-              softWrap: true,
-            ),
-          ),
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(right: 90),
-            child: pw.Text(
-              '${data['quantity'] ?? 1}', // Use dynamic quantity
-              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-            ),
-          ),
+        if (data['items'] != null && (data['items'] as List).isNotEmpty)
+          ...(data['items'] as List).map((item) {
+            final double itemPrice = double.tryParse(item['price'].toString()) ?? 0;
+            final double itemNet = double.parse((itemPrice / 1.19).toStringAsFixed(2));
+            final String itemIssues = (item['issues'] as List<dynamic>?)?.join(', ') ?? '';
+            final String itemQty = (item['quantity'] ?? 1).toString();
 
-          pw.Text('${currencyFormat.format(netAmount)} ',
-              style:
-              pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-        ],
-      ),
+            return pw.Column(
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Container(
+                      width: 180,
+                      child: pw.Text(
+                        '$itemIssues ${data['deviceType']} ${data['deviceModel']} inkl. Montage',
+                        style: pw.TextStyle(
+                            fontSize: 10, fontWeight: pw.FontWeight.bold),
+                        softWrap: true,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(right: 90),
+                      child: pw.Text(
+                        itemQty,
+                        style: pw.TextStyle(
+                            fontSize: 14, fontWeight: pw.FontWeight.bold),
+                      ),
+                    ),
+
+                    pw.Text('${currencyFormat.format(itemNet)} ',
+                        style: pw.TextStyle(
+                            fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  ],
+                ),
+                pw.SizedBox(height: 5),
+              ],
+            );
+          }).toList()
+        else
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Container(
+                width: 180,
+                child: pw.Text(
+                  '${data['issue']} ${data['deviceType']} ${data['deviceModel']} inkl. Montage',
+                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                  softWrap: true,
+                ),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(right: 90),
+                child: pw.Text(
+                  '${data['quantity'] ?? 1}', // Use dynamic quantity
+                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+
+              pw.Text('${currencyFormat.format(netAmount)} ',
+                  style:
+                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            ],
+          ),
       pw.Divider(thickness: 1),
 
       pw.SizedBox(height: 5),

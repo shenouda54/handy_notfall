@@ -101,9 +101,10 @@ class PdfWidgets {
               fontSize: 20, fontWeight: pw.FontWeight.bold)); // Some use 16, some 20.
      // auftrag: 20
      // rechnung: 20 (Auftrag Nr)
+    // rechnung_handy: 16 (Rechnung)
+    // verkaufe: 16 (Rechnung)
      // kostenmittlung: 16 (Kostenmittlung)
-     // rechnung_handy: 16 (Rechnung)
-     // verkaufe: 16 (Rechnung)
+
      // I will pass the style or fontSize as optional.
   }
 

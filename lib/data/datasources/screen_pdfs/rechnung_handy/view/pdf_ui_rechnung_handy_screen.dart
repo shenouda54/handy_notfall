@@ -1,11 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../shared/pdf_widgets.dart';
 
 Future<pw.Widget> buildPdfContent(
-    Map<String, dynamic> data, String auftragNr) async {
+    Map<String, dynamic> data, String rechnungNr) async {
   final ByteData bytes = await rootBundle.load('assets/images/pdf.png');
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
@@ -20,36 +19,76 @@ Future<pw.Widget> buildPdfContent(
 
       PdfWidgets.buildCustomerInfo(
         data: data,
-        title: 'Rechnung',
-        titleNumber: auftragNr,
+        title: 'Rechnung Nr',
+        titleNumber: rechnungNr,
         logoBytes: logoBytes,
       ),
 
       PdfWidgets.buildTableHeader(),
       pw.SizedBox(height: 8),
-      pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Container(
-            width: 180,
-            child: pw.Text(
-              ' Gebraucht ${data['issue']} ${data['deviceType']} ${data['deviceModel']}.',
-              style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-              softWrap: true,
-            ),
+        if (data['items'] != null && (data['items'] as List).isNotEmpty)
+          ...(data['items'] as List).map((item) {
+            final double itemPrice = double.tryParse(item['price'].toString()) ?? 0;
+            final String itemIssues = (item['issues'] as List<dynamic>?)?.join(', ') ?? '';
+            final String itemQty = (item['quantity'] ?? 1).toString();
+
+            return pw.Column(
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Container(
+                      width: 180,
+                      child: pw.Text(
+                        ' Gebraucht $itemIssues ${data['deviceType']} ${data['deviceModel']}.',
+                        style: pw.TextStyle(
+                            fontSize: 10, fontWeight: pw.FontWeight.bold),
+                        softWrap: true,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(right: 90),
+                      child: pw.Text(
+                        itemQty,
+                        style: pw.TextStyle(
+                            fontSize: 14, fontWeight: pw.FontWeight.bold),
+                      ),
+                    ),
+                    pw.Text('${currencyFormat.format(itemPrice)} ',
+                        style: pw.TextStyle(
+                            fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  ],
+                ),
+                pw.SizedBox(height: 5),
+              ],
+            );
+          }).toList()
+        else
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Container(
+                width: 180,
+                child: pw.Text(
+                  ' Gebraucht ${data['issue']} ${data['deviceType']} ${data['deviceModel']}.',
+                  style: pw.TextStyle(
+                      fontSize: 10, fontWeight: pw.FontWeight.bold),
+                  softWrap: true,
+                ),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(right: 90),
+                child: pw.Text(
+                  '${data['quantity'] ?? 1}', // Use dynamic quantity
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.Text('${currencyFormat.format(netAmount)} ',
+                  style: pw.TextStyle(
+                      fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            ],
           ),
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(right: 90),
-            child: pw.Text(
-              '${data['quantity'] ?? 1}', // Use dynamic quantity
-              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-            ),
-          ),
-          pw.Text('${currencyFormat.format(netAmount)} ',
-              style:
-                  pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-        ],
-      ),
       pw.SizedBox(height: 10),
 
       pw.Divider(thickness: 1),
