@@ -21,6 +21,7 @@ class CustomerModel {
   int? printId;
   int? kundennummer; // رقم العميل
   String? auftragNr; // رقم الطلب
+  String? rechnungCode; // كود الفاتورة/الفواتير
 
   CustomerModel({
     this.id = '',
@@ -40,6 +41,7 @@ class CustomerModel {
     this.printId,
     this.kundennummer, // رقم العميل
     this.auftragNr, // رقم الطلب
+    this.rechnungCode, // كود الفاتورة/الفواتير
     Timestamp? startDate,
     Timestamp? endDate,
     this.isDone = false,
@@ -68,6 +70,7 @@ class CustomerModel {
       printId: json['printId'],
       kundennummer: json['kundennummer'], // رقم العميل
       auftragNr: json['auftragNr'], // رقم الطلب
+      rechnungCode: json['rechnungCode'], // كود الفاتورة/الفواتير
     );
   }
 
@@ -93,6 +96,7 @@ class CustomerModel {
       "printId": printId,
       "kundennummer": kundennummer, // رقم العميل
       "auftragNr": auftragNr, // رقم الطلب
+      "rechnungCode": rechnungCode, // كود الفاتورة/الفواتير
     };
   }
 }
