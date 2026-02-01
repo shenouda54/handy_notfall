@@ -39,9 +39,9 @@ class CustomerModel {
     this.quantity = 1,
     required this.userEmail,
     this.printId,
-    this.kundennummer, // رقم العميل
-    this.auftragNr, // رقم الطلب
-    this.rechnungCode, // كود الفاتورة/الفواتير
+    this.kundennummer,
+    this.auftragNr,
+    this.rechnungCode,
     Timestamp? startDate,
     Timestamp? endDate,
     this.isDone = false,
@@ -68,9 +68,9 @@ class CustomerModel {
       endDate: json['endDate'] != null ? json['endDate'] as Timestamp : Timestamp.now(),
       isDone: json['isDone'] ?? false,
       printId: json['printId'],
-      kundennummer: json['kundennummer'], // رقم العميل
-      auftragNr: json['auftragNr'], // رقم الطلب
-      rechnungCode: json['rechnungCode'], // كود الفاتورة/الفواتير
+      kundennummer: json['kundennummer'],
+      auftragNr: json['auftragNr'],
+      rechnungCode: json['rechnungCode'],
     );
   }
 
@@ -94,9 +94,9 @@ class CustomerModel {
       "isDone": isDone,
       "userEmail": userEmail,
       "printId": printId,
-      "kundennummer": kundennummer, // رقم العميل
-      "auftragNr": auftragNr, // رقم الطلب
-      "rechnungCode": rechnungCode, // كود الفاتورة/الفواتير
+      "kundennummer": kundennummer,
+      "auftragNr": auftragNr,
+      "rechnungCode": rechnungCode,
     };
   }
 }

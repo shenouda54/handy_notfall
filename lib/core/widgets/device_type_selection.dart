@@ -15,7 +15,10 @@ class DeviceTypeSelection extends StatelessWidget {
     required this.onAdd,
     required this.onRemove,
     required this.customDeviceController,
+    this.enabled = true,
   });
+
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,7 @@ class DeviceTypeSelection extends StatelessWidget {
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.search),
                       tooltip: 'Forschung über ein Gerät ',// بحث عن نوع جهاز
-                      onPressed: () async {
+                      onPressed: !enabled ? null : () async {
                         final selected = await showDialog<String>(
                           context: context,
                           builder: (context) {
@@ -135,18 +138,19 @@ class DeviceTypeSelection extends StatelessWidget {
               children: selectedDeviceTypes.map((type) {
                 return Chip(
                   label: Text(type),
-                  onDeleted: () => onRemove(type),
+                  onDeleted: !enabled ? null : () => onRemove(type),
                 );
               }).toList(),
             ),
             const SizedBox(height: 10),
             TextFormField(
+              enabled: enabled,
               controller: customDeviceController,
               decoration: InputDecoration(
                 labelText: 'Weitere Gerätetyp (Optional)',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add),
-                  onPressed: () {
+                  onPressed: !enabled ? null : () {
                     final custom = customDeviceController.text.trim();
                     if (custom.isNotEmpty) {
                       onAdd(custom);

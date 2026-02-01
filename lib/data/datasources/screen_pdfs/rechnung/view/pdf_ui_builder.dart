@@ -22,9 +22,10 @@ Future<pw.Widget> buildPdfContent(
 
       PdfWidgets.buildCustomerInfo(
         data: data,
-        title: 'Auftrag Nr',
+        title: 'Rechnung Nr',
         titleNumber: auftragNr,
         logoBytes: logoBytes,
+        date: data['endDate'] != null ? (data['endDate'] as Timestamp).toDate() : null,
       ),
 
       PdfWidgets.buildTableHeader(),

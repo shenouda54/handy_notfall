@@ -34,6 +34,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
 
   List<String> selectedDeviceTypes = [];
   List<String> selectedIssues = [];
+  bool isLocked = false;
 
   final List<String> deviceTypes = [
     'Dell', 'Apple', 'Samsung', 'HP', 'Lenovo', 'Sony', 'LG', 'Huawei',
@@ -93,9 +94,12 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
             .format((data['startDate'] as Timestamp).toDate());
         endDateController.text = DateFormat('yyyy-MM-dd')
             .format((data['endDate'] as Timestamp).toDate());
+        
+        final rechnungCode = data['rechnungCode']?.toString();
+        isLocked = rechnungCode != null && rechnungCode.isNotEmpty;
       });
     } catch (e) {
-      print("Error loading customer data: $e");
+      debugPrint("Error loading customer data: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -170,15 +174,37 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
           key: _formKey,
           child: Column(
             children: [
-              CustomInputField(controller: firstNameController, label: "Vor- und Nachname"),
+              if (isLocked)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    border: Border.all(color: Colors.red),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.lock, color: Colors.red),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Bearbeitung gesperrt: Rechnung wurde bereits erstellt.",
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              CustomInputField(controller: firstNameController, label: "Vor- und Nachname", enabled: !isLocked),
               const SizedBox(height: 12),
-              CustomInputField(controller: phoneController, label: "Telefonnummer"),
+              CustomInputField(controller: phoneController, label: "Telefonnummer", enabled: !isLocked),
               const SizedBox(height: 12),
-              CustomInputField(controller: addressController, label: "PLZ & Wohnort"),
+              CustomInputField(controller: addressController, label: "PLZ & Wohnort", enabled: !isLocked),
               const SizedBox(height: 12),
-              CustomInputField(controller: cityController, label: "Straße & Hausnummer "),
+              CustomInputField(controller: cityController, label: "Straße & Hausnummer ", enabled: !isLocked),
               const SizedBox(height: 12),
-              CustomInputField(controller: emailController, label: "E-Mail des Empfängers "),
+              CustomInputField(controller: emailController, label: "E-Mail des Empfängers ", enabled: !isLocked),
               const SizedBox(height: 12),
               DeviceTypeSelection(
                 deviceTypes: deviceTypes,
@@ -196,13 +222,14 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                   });
                 },
                 customDeviceController: customDeviceController,
+                enabled: !isLocked, // Add enabled prop to DeviceTypeSelection
               ),
               const SizedBox(height: 12),
-              CustomInputField(controller: modelController, label: "Modellnummer "),
+              CustomInputField(controller: modelController, label: "Modellnummer ", enabled: !isLocked),
               const SizedBox(height: 12),
-              CustomInputField(controller: serialNumberController, label: " Seriennummer"),
+              CustomInputField(controller: serialNumberController, label: " Seriennummer", enabled: !isLocked),
               const SizedBox(height: 12),
-              CustomInputField(controller: pinCodeController, label: "Speer/Pin Code"),
+              CustomInputField(controller: pinCodeController, label: "Speer/Pin Code", enabled: !isLocked),
               const SizedBox(height: 12),
               IssueSelection(
                 issueOptions: issueOptions,
@@ -214,30 +241,35 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                   });
                 },
                 onRemoveIssue: (issue) {
+                  if (isLocked) return;
                   setState(() {
                     selectedIssues.remove(issue);
                   });
                 },
+                enabled: !isLocked, // Add enabled prop to IssueSelection
               ),
               const SizedBox(height: 12),
               CustomInputField(
                 controller: repairPriceController,
                 label: ' Reparatur Preis ',
                 keyboardType: TextInputType.number,
+                enabled: !isLocked,
               ),
               const SizedBox(height: 12),
               CustomInputField(
                 controller: quantityController,
                 label: ' Menge ',
                 keyboardType: TextInputType.number,
+                enabled: !isLocked,
               ),
               const SizedBox(height: 12),
-              DatePickerField(controller: startDateController, label: ' Anfang'),
-              const SizedBox(height: 12),
-              DatePickerField(controller: endDateController, label: 'Abholung '),
+              DatePickerField(controller: endDateController, label: 'Abholung ', enabled: !isLocked),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _updateCustomer,
+                onPressed: isLocked ? null : _updateCustomer,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isLocked ? Colors.grey : null,
+                ),
                 child: const Text(" Änderungen speichern"),
               ),
             ],

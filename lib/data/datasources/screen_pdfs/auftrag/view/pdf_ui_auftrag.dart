@@ -24,6 +24,7 @@ Future<pw.Widget> buildPdfContent(
         logoBytes: logoBytes,
         showImei: true,
         showPinCode: true,
+        showAuftragNrInHeader: false,
       ),
       PdfWidgets.buildTableHeader(),
       pw.SizedBox(height: 6),

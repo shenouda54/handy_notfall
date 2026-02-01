@@ -4,9 +4,10 @@ import 'package:intl/intl.dart';
 class DatePickerField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
+  final bool enabled;
 
   const DatePickerField(
-      {super.key, required this.controller, required this.label});
+      {super.key, required this.controller, required this.label, this.enabled = true});
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +16,12 @@ class DatePickerField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         readOnly: true,
+        enabled: enabled,
         decoration: InputDecoration(
             labelText: label, border: const OutlineInputBorder()),
-        onTap: () async {
+        onTap: !enabled
+            ? null
+            : () async {
           DateTime? picked = await showDatePicker(
             context: context,
             initialDate: DateTime.now(),

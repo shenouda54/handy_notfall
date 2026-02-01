@@ -5,6 +5,7 @@ class CustomInputField extends StatelessWidget {
   final String label;
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
+  final bool enabled;
 
   const CustomInputField({
     super.key,
@@ -12,6 +13,7 @@ class CustomInputField extends StatelessWidget {
     required this.label,
     this.keyboardType = TextInputType.text,
     this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -21,6 +23,7 @@ class CustomInputField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        enabled: enabled,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),

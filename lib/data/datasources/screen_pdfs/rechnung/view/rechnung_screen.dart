@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:handy_notfall/core/widgets/error_widget.dart';
 
 import 'package:handy_notfall/data/datasources/screen_pdfs/rechnung/view_model/pdf_logic.dart';
 import 'package:handy_notfall/data/datasources/print_pdf/rechnung_number/view_model/rechnung_numbering_logic.dart';
+
 
 class RechnungScreen extends StatelessWidget {
   final String customerId;
@@ -70,8 +73,8 @@ class RechnungScreen extends StatelessWidget {
                 // 1) زر العين (طباعة مباشرة)
                 IconButton(
                   onPressed: () async {
-                    // Use rechnungCode if present, otherwise fallback to auftragNr
-                    final code = data['rechnungCode']?.toString() ?? auftragNr;
+                    // Use rechnungCode if present, otherwise pass empty string
+                    final code = data['rechnungCode']?.toString() ?? '';
                     await generatePdf(data, context, code);
                   },
                   icon: const Icon(Icons.remove_red_eye, size: 40, color: Colors.blue),
@@ -79,15 +82,73 @@ class RechnungScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 40),
 
-                // 2) زر الطباعة (توليد كود وطباعة)
+                // 2) زر الطباعة (توليد كود وطباعة أو إرسال إيميل)
                 IconButton(
                   onPressed: () async {
+                    // Show dialog to choose action
+                    final action = await showDialog<String>(
+                      context: context,
+                      builder: (ctx) => SimpleDialog(
+                        title: const Text("اختر إجراء"),
+                        children: [
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.pop(ctx, 'print'),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.print, color: Colors.blue),
+                                  SizedBox(width: 12),
+                                  Text("معاينة / طباعة", style: TextStyle(fontSize: 16)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.pop(ctx, 'email_me'),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.person, color: Colors.blueGrey),
+                                  SizedBox(width: 12),
+                                  Text("إرسال إلى إيميلي", style: TextStyle(fontSize: 16)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.pop(ctx, 'email_customer'),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.alternate_email, color: Colors.orange),
+                                  SizedBox(width: 12),
+                                  Text("إرسال إلى إيميل العميل", style: TextStyle(fontSize: 16)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (action == null) return;
+
+                    // Determine target string for confirmation message
+                    String actionText = "طباعة";
+                    if (action == 'email_me') actionText = "وإرسال (لي)";
+                    if (action == 'email_customer') actionText = "وإرسال (للعميل)";
+
+                    // Confirm generation if needed
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: const Text("تأكيد"),
-                        content: const Text(
-                            "هل تريد توليد وطباعـة كود Rechnung لهذا الطلب؟"),
+                        content: Text(
+                            "هل تريد توليد $actionText كود Rechnung لهذا الطلب؟"),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(ctx).pop(false),
@@ -103,6 +164,7 @@ class RechnungScreen extends StatelessWidget {
 
                     if (confirm != true) return;
 
+                    // 1. Generate Invoice Number
                     final result =
                         await RechnungNumberingService.assignRechnungCode(
                       customerId: customerId,
@@ -112,11 +174,41 @@ class RechnungScreen extends StatelessWidget {
                         result["message"]?.toString() ?? "تم تنفيذ الطلب.";
                     final code = result["rechnungCode"]?.toString();
 
-                    if (result["success"] == true &&
-                        code != null &&
-                        code.isNotEmpty) {
-                      await generatePdf(data, context, code);
-                    }
+                      if (result["success"] == true &&
+                          code != null &&
+                          code.isNotEmpty) {
+                        
+                        // 2. Determine Recipient and Generate PDF
+                        String? targetEmail;
+                        bool sendEmail = false;
+
+                        if (action == 'email_me') {
+                          targetEmail = FirebaseAuth.instance.currentUser?.email;
+                          sendEmail = true;
+                        } else if (action == 'email_customer') {
+                          targetEmail = data['emailAddress']; // Ensure this matches Firestore key
+                          sendEmail = true;
+                        }
+
+                        // If a NEW code was generated (and thus endDate updated), fetch fresh data
+                        Map<String, dynamic> dataToUse = data;
+                        if (result["isNew"] == true) {
+                          try {
+                            dataToUse = await fetchCustomerData();
+                          } catch (e) {
+                            print("Error fetching updated data: $e");
+                            // Fallback to existing data if fetch fails, but endDate might be old
+                          }
+                        }
+
+                        await generatePdf(
+                          dataToUse, 
+                          context, 
+                          code,
+                          sendEmail: sendEmail,
+                          userEmail: targetEmail,
+                        );
+                      }
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -129,7 +221,7 @@ class RechnungScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.print, size: 40, color: Colors.green),
-                  tooltip: "توليد كود وطباعة",
+                  tooltip: "خيارات الفاتورة",
                 ),
               ],
             ),

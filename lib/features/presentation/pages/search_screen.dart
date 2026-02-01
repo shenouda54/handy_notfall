@@ -15,6 +15,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
+  final TextEditingController invoiceAddressController = TextEditingController();
 
   List<Map<String, dynamic>> customers = [];
   List<Map<String, dynamic>> filteredCustomers = [];
@@ -61,7 +62,8 @@ class _SearchScreenState extends State<SearchScreen> {
           "city": doc["city"] ?? "",
           "email": doc["emailAddress"] ?? "",
           "id": doc.id,
-          "auftragNr": doc.data().toString().contains('auftragNr') ? doc['auftragNr'] : null,
+          "auftragNr": doc.data().toString().contains('auftragNr') ? doc['auftragNr'] : "",
+          "rechnungCode": doc.data().toString().contains('rechnungCode') ? doc['rechnungCode'] : "",
         };
       }).toList();
 
@@ -72,7 +74,9 @@ class _SearchScreenState extends State<SearchScreen> {
           // مسح الفلاتر عند إضافة عميل جديد لضمان ظهوره
           searchController.clear();
           dateController.clear();
+          dateController.clear();
           modelController.clear();
+          invoiceAddressController.clear();
           filteredCustomers = customerList;
         } else {
           // إعادة تطبيق الفلاتر الحالية بعد جلب البيانات الجديدة
@@ -99,6 +103,7 @@ class _SearchScreenState extends State<SearchScreen> {
     String query = searchController.text.toLowerCase();
     String selectedDate = dateController.text.trim();
     String modelText = modelController.text.toLowerCase();
+    String invoiceAddressText = invoiceAddressController.text.toLowerCase();
 
     setState(() {
       filteredCustomers = customers.where((customer) {
@@ -110,12 +115,21 @@ class _SearchScreenState extends State<SearchScreen> {
             customer["deviceType"].toLowerCase().contains(modelText) ||
             customer["deviceModel"].toLowerCase().contains(modelText);
 
+        String fullAddress = "${customer["address"] ?? ""} ${customer["city"] ?? ""}".toLowerCase();
+        
+        bool matchesInvoiceAddress = invoiceAddressText.isEmpty ||
+            (customer["auftragNr"] != null &&
+                customer["auftragNr"].toString().toLowerCase().contains(invoiceAddressText)) ||
+            (customer["rechnungCode"] != null &&
+                customer["rechnungCode"].toString().toLowerCase().contains(invoiceAddressText)) ||
+             fullAddress.contains(invoiceAddressText);
+
         bool matchesDate = selectedDate.isEmpty
             ? true
             : DateFormat('yyyy-MM-dd').format(customer["startDate"]) ==
                 selectedDate;
 
-        return matchesSearch && matchesDeviceText && matchesDate;
+        return matchesSearch && matchesDeviceText && matchesInvoiceAddress && matchesDate;
       }).toList();
 
       currentPage = 0; // إعادة تعيين الصفحة إلى الأولى
@@ -167,6 +181,15 @@ class _SearchScreenState extends State<SearchScreen> {
               controller: modelController,
               decoration: const InputDecoration(
                 labelText: "Gerätemodell eingeben...",
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) => filterSearch(),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: invoiceAddressController,
+              decoration: const InputDecoration(
+                labelText: "Suche nach Rechnungsnr. oder Adresse...",
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) => filterSearch(),

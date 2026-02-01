@@ -24,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // 🔍 تحقق مما إذا كان الإيميل مسجلًا بالفعل
+      //  تحقق مما إذا كان الإيميل مسجلًا بالفعل
       List<String> signInMethods = await FirebaseAuth.instance
           .fetchSignInMethodsForEmail(emailController.text.trim());
 

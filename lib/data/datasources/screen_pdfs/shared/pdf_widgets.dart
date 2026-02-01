@@ -16,6 +16,8 @@ class PdfWidgets {
     required Uint8List logoBytes,
     bool showImei = false,
     bool showPinCode = false,
+    bool showAuftragNrInHeader = true,
+    DateTime? date,
   }) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -41,12 +43,17 @@ class PdfWidgets {
                   style: pw.TextStyle(
                       fontSize: 12, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 40),
+              if (showAuftragNrInHeader)
+                pw.Text(
+                    "Auftrag Nr: ${data['auftragNr'] ?? ''}",
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
               pw.Text(
                   "Kundennummer: ${data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر'}",
                   style: pw.TextStyle(
                       fontSize: 12, fontWeight: pw.FontWeight.bold)),
               pw.Text(
-                'Datum: ${DateFormat('dd.MM.yyyy').format((data['startDate'] as Timestamp).toDate())}',
+                'Datum: ${DateFormat('dd.MM.yyyy').format(date ?? (data['startDate'] as Timestamp).toDate())}',
                 style: pw.TextStyle(
                   fontSize: 12,
                   fontWeight: pw.FontWeight.bold,

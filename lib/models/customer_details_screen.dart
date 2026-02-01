@@ -11,17 +11,22 @@ import '../data/datasources/screen_pdfs/rechnung_handy/view/rechnung_handy_scree
 import '../data/datasources/screen_pdfs/rechnungs_verkaufe/view/rechnungs_verkaufe_screen.dart';
 
 
-class CustomerDetailsScreen extends StatelessWidget {
+class CustomerDetailsScreen extends StatefulWidget {
   final String customerId;
   final String auftragNr;
 
   const CustomerDetailsScreen({super.key, required this.customerId, required this.auftragNr});
 
+  @override
+  State<CustomerDetailsScreen> createState() => _CustomerDetailsScreenState();
+}
+
+class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   Future<DocumentSnapshot> fetchCustomerDetails() async {
     try {
       return await FirebaseFirestore.instance
           .collection('Customers')
-          .doc(customerId)
+          .doc(widget.customerId)
           .get();
     } catch (e) {
       throw Exception('Failed to load customer data: $e');
@@ -41,7 +46,7 @@ class CustomerDetailsScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return CustomErrorWidget(
             errorMessage: snapshot.error.toString(),
-            onRetry: () => (context as Element).markNeedsBuild(),
+            onRetry: () => setState(() {}),
             onGoBack: () => Navigator.pop(context),
           );
         }
@@ -62,8 +67,8 @@ class CustomerDetailsScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.format_list_numbered),
                 tooltip: 'ترقيم العميل',
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => CustomerNumberingScreen(
@@ -72,6 +77,7 @@ class CustomerDetailsScreen extends StatelessWidget {
                       ),
                     ),
                   );
+                  setState(() {});
                 },
               ),
             ],
@@ -109,7 +115,7 @@ class CustomerDetailsScreen extends StatelessWidget {
                 ], theme),
                 
                 const SizedBox(height: 30),
-                _buildActionButtons(context, data, customerId, theme),
+                _buildActionButtons(context, data, widget.customerId, theme),
                 const SizedBox(height: 20),
               ],
             ),
@@ -227,10 +233,12 @@ class CustomerDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context, Map<String, dynamic> data, String customerId, ThemeData theme) {
-    void navigateTo(Widget screen) {
+    void navigateTo(Widget screen) async {
        if (data.containsKey('auftragNr')) {
-          final auftragNr = data['auftragNr']?.toString() ?? '';
-          Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+          // Await the result and refresh
+          await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+          // Refresh the state to show potential data changes
+          setState(() {});
        } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("❌ العميل غير مرقّم، من فضلك استخدم شاشة الترقيم أولًا.")));
        }

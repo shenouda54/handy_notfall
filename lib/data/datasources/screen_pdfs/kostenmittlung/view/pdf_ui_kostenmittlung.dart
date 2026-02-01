@@ -27,6 +27,7 @@ Future<pw.Widget> buildPdfContent(
         title: 'Kostenmittlung',
         titleNumber: auftragNr,
         logoBytes: logoBytes,
+        showAuftragNrInHeader: false,
       ),
 
       PdfWidgets.buildTableHeader(),

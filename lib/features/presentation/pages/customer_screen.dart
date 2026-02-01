@@ -55,7 +55,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
         title: !isSearching
             ? const Text('Kunden Daten')
             : TextField(
@@ -67,7 +66,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
           ),
           style: const TextStyle(color: Colors.white),
           onChanged: (value) {
-            print('Searching for: $value');
+            debugPrint('Searching for: $value');
           },
         ),
         actions: [
@@ -94,7 +93,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       onPressed: () async {
                         Navigator.pop(context);
                         await FirebaseAuth.instance.signOut();
-                        Navigator.of(context).pushAndRemoveUntil(
+                        Navigator.of( context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const LoginScreen()), // عدل اسم الصفحة حسب تطبيقك
                               (route) => false,
                         );

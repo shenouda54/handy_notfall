@@ -21,10 +21,13 @@ class CustomerService {
       // حفظ الجهاز في قاعدة البيانات
       await FirebaseFireStore.addCustomer(model);
       
-      // ثانياً: نستدعي نظام الترقيم لتحديث جميع أجهزة العميل
+      // انتظر قليلاً لضمان اكتمال الحفظ في قاعدة البيانات (لتجنب Race Condition)
+      await Future.delayed(const Duration(seconds: 1));
+
       final numberingResult = await CustomerNumberingService.assignCustomerNumber(
         model.customerFirstName, 
-        model.phoneNumber
+        model.phoneNumber,
+        currentDocId: model.id,
       );
       
       if (!numberingResult['success']) {

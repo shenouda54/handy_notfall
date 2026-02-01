@@ -17,7 +17,10 @@ class IssueSelection extends StatelessWidget {
     required this.onRemoveIssue,
     required this.customIssueController,
     this.menuMaxHeight,
+    this.enabled = true,
   });
+
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class IssueSelection extends StatelessWidget {
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.search),
                       tooltip: 'Forschung über ein Gerät ',
-                      onPressed: () async {
+                      onPressed: !enabled ? null : () async {
                         final selected = await showDialog<String>(
                           context: context,
                           builder: (context) {
@@ -134,18 +137,19 @@ class IssueSelection extends StatelessWidget {
               children: selectedIssues
                   .map((issue) => Chip(
                         label: Text(issue),
-                        onDeleted: () => onRemoveIssue(issue),
+                        onDeleted: !enabled ? null : () => onRemoveIssue(issue),
                       ))
                   .toList(),
             ),
             const SizedBox(height: 10),
             TextFormField(
+              enabled: enabled,
               controller: customIssueController,
               decoration: InputDecoration(
                 labelText: 'Weitere Fehler (Optional)',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add),
-                  onPressed: () {
+                  onPressed: !enabled ? null : () {
                     if (customIssueController.text.isNotEmpty) {
                       onAddIssue(customIssueController.text);
                       customIssueController.clear();

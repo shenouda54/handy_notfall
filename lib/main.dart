@@ -18,7 +18,6 @@ void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Forward Flutter framework errors to this zone
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.presentError(details);
       if (details.stack != null) {
