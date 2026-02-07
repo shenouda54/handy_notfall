@@ -118,8 +118,6 @@ class _SearchScreenState extends State<SearchScreen> {
         String fullAddress = "${customer["address"] ?? ""} ${customer["city"] ?? ""}".toLowerCase();
         
         bool matchesInvoiceAddress = invoiceAddressText.isEmpty ||
-            (customer["auftragNr"] != null &&
-                customer["auftragNr"].toString().toLowerCase().contains(invoiceAddressText)) ||
             (customer["rechnungCode"] != null &&
                 customer["rechnungCode"].toString().toLowerCase().contains(invoiceAddressText)) ||
              fullAddress.contains(invoiceAddressText);

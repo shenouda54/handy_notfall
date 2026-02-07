@@ -71,6 +71,13 @@ class PdfWidgets {
                           fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 ],
               ),
+              pw.Row(
+                children: [
+                  pw.Text('IMEL: ${data['serialNumber']}',
+                      style: pw.TextStyle(
+                          fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                ]
+              ),
               if (showImei)
                 pw.Text('IMEL: ${data['serialNumber']}',
                     style: pw.TextStyle(
