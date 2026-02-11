@@ -41,7 +41,9 @@ class AuftragPdfService {
         }
       }
 
+
       final pdfData = {
+        'defects': entity.defects.map((e) => e.toMap()).toList(),
         'customerFirstName': entity.customerFirstName.trim(),
         'address': entity.address.trim(),
         'city': entity.city.trim(),
@@ -51,8 +53,6 @@ class AuftragPdfService {
         'deviceModel': entity.deviceModel.trim(),
         'serialNumber': entity.serialNumber.trim(),
         'pinCode': entity.pinCode.trim(),
-        'issue': entity.issue,
-        'price': entity.price,
         'startDate': entity.startDate,
         'endDate': entity.endDate,
         'kundennummer': kundennummer,

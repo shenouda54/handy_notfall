@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'defect_item.dart';
 
 class CustomerDataEntity {
   final String customerFirstName;
@@ -10,9 +11,7 @@ class CustomerDataEntity {
   final String deviceModel;
   final String serialNumber;
   final String pinCode;
-  final String issue;
-  final int price;
-  final int quantity;
+  final List<DefectItem> defects;
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isDone;
@@ -28,9 +27,7 @@ class CustomerDataEntity {
     required this.deviceModel,
     required this.serialNumber,
     required this.pinCode,
-    required this.issue,
-    required this.price,
-    required this.quantity,
+    required this.defects,
     required this.startDate,
     required this.endDate,
     required this.isDone,

@@ -11,6 +11,7 @@ import '../../domain/entities/customer_data_telpone_entity.dart';
 import 'package:handy_notfall/service/issue_storage_service.dart';
 import 'package:handy_notfall/service/storage_service.dart';
 import 'package:handy_notfall/service/auftrag_pdf_service.dart';
+import '../../domain/entities/defect_item.dart';
 
 class DataTelponeScreen extends StatefulWidget {
   final String firstName;
@@ -38,8 +39,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   final TextEditingController deviceTypesController = TextEditingController();
   final TextEditingController serialNumberController = TextEditingController();
   final TextEditingController pinCodeController = TextEditingController();
-  final TextEditingController repairPriceController = TextEditingController();
-  final TextEditingController quantityController = TextEditingController(text: '1');
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController customIssueController = TextEditingController();
@@ -51,7 +50,6 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Toshiba', 'Asus', 'Acer', 'Microsoft', 'Realme', 'HTC', 'Motorola',
     'Blackberry',  'Caterpillar', 'Oppo', 'Google', 'Oneplus',
   ];
-  // To Do  هنعمل تعديل بدل الاضافيه اليدويه وهندخل  api
 
   List<String> issueOptions = [
     'Display', 'Akku', 'Kamera', 'Kameraglas', 'Hörmuschel',
@@ -61,9 +59,8 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     'Mikrofon', 'Kostenvoranschlag', 'Tischlampe', 'Reinigung',
   ];
 
-  // To Do  هنعمل تعديل بدل الاضافيه اليدويه وهندخل  api
-
-  final List<String> selectedIssues = [];
+  // Dynamic list for defect cards
+  List<DefectCardState> defectCards = [];
   bool _isLoading = true;
   bool _isSaving = false; // متغير للتحكم في حالة الحفظ
 
@@ -74,6 +71,8 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
     super.initState();
     _loadCustomDeviceTypes();
     _loadCustomIssues();
+    // Add first defect card by default
+    defectCards.add(DefectCardState());
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _isLoading = false;
@@ -108,11 +107,14 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
   void dispose() {
     modelController.dispose();
     deviceTypesController.dispose();
-    repairPriceController.dispose();
-    quantityController.dispose();
     startDateController.dispose();
     endDateController.dispose();
     customIssueController.dispose();
+    // Dispose defect card controllers
+    for (var card in defectCards) {
+      card.priceController.dispose();
+      card.quantityController.dispose();
+    }
     super.dispose();
   }
 
@@ -160,40 +162,28 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
               const SizedBox(height: 16.0),
               CustomInputField(controller: pinCodeController, label: 'Speer/Pin Code *'),
               const SizedBox(height: 16.0),
-              // إزالة Row التي تحتوي على IssueSelection وIconButton البحث
-              IssueSelection(
-                issueOptions: issueOptions,
-                selectedIssues: selectedIssues,
-                customIssueController: customIssueController,
-                onAddIssue: (issue) async {
-                  setState(() {
-                    if (!selectedIssues.contains(issue)) {
-                      selectedIssues.add(issue);
-                    }
-                    if (!issueOptions.contains(issue)) {
-                      issueOptions.add(issue);
-                    }
-                  });
-                  await StorageService.saveIssue(issue);
-                },
-                onRemoveIssue: (issue) {
-                  setState(() {
-                    selectedIssues.remove(issue);
-                  });
-                },
-                menuMaxHeight: 250,
-              ),
-              const SizedBox(height: 16.0),
-              CustomInputField(
-                controller: repairPriceController,
-                label: 'Reparatur Preis *',
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16.0),
-              CustomInputField(
-                controller: quantityController,
-                label: 'Menge *',
-                keyboardType: TextInputType.number,
+              // Defect Cards Section
+              ...defectCards.asMap().entries.map((entry) {
+                int index = entry.key;
+                DefectCardState card = entry.value;
+                return Column(
+                  children: [
+                    _buildDefectCard(card, index),
+                    const SizedBox(height: 8.0),
+                  ],
+                );
+              }).toList(),
+              // Add button
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(Icons.add_circle, color: Colors.green, size: 32),
+                  onPressed: () {
+                    setState(() {
+                      defectCards.add(DefectCardState());
+                    });
+                  },
+                ),
               ),
               const SizedBox(height: 16.0),
               DatePickerField(controller: startDateController, label: 'Anfang *'),
@@ -223,7 +213,17 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       return;
                     }
                     
+                    
                     try {
+                      // Collect defects from all cards
+                      List<DefectItem> defects = defectCards.map((card) {
+                        return DefectItem(
+                          issue: card.selectedIssues.join(', '),
+                          price: int.tryParse(card.priceController.text.trim()) ?? 0,
+                          quantity: int.tryParse(card.quantityController.text.trim()) ?? 1,
+                        );
+                      }).toList();
+
                       final entity = CustomerDataEntity(
                         customerFirstName: widget.firstName.trim(),
                         address: widget.address.trim(),
@@ -234,11 +234,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         deviceModel: modelController.text.trim(),
                         serialNumber: serialNumberController.text.trim(),
                         pinCode: pinCodeController.text.trim(),
-                        issue: selectedIssues.isNotEmpty
-                            ? selectedIssues.join(', ')
-                            : 'No Issues',
-                        price: int.tryParse(repairPriceController.text.trim()) ?? 0,
-                        quantity: int.tryParse(quantityController.text.trim()) ?? 1,
+                        defects: defects,
                         startDate: startDateController.text.isNotEmpty
                             ? Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text.trim()))
                             : Timestamp.now(),
@@ -303,4 +299,89 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
       ),
     );
   }
+
+  Widget _buildDefectCard(DefectCardState card, int index) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Problem ${index + 1}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                if (defectCards.length > 1)
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        defectCards.removeAt(index);
+                      });
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Issue Selection
+            IssueSelection(
+              issueOptions: issueOptions,
+              selectedIssues: card.selectedIssues,
+              customIssueController: customIssueController,
+              onAddIssue: (issue) async {
+                setState(() {
+                  if (!card.selectedIssues.contains(issue)) {
+                    card.selectedIssues.add(issue);
+                  }
+                  if (!issueOptions.contains(issue)) {
+                    issueOptions.add(issue);
+                  }
+                });
+                await StorageService.saveIssue(issue);
+              },
+              onRemoveIssue: (issue) {
+                setState(() {
+                  card.selectedIssues.remove(issue);
+                });
+              },
+              menuMaxHeight: 200,
+            ),
+            const SizedBox(height: 12),
+            // Price and Quantity in a Row
+            Row(
+              children: [
+                Expanded(
+                  child: CustomInputField(
+                    controller: card.priceController,
+                    label: 'Preis *',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CustomInputField(
+                    controller: card.quantityController,
+                    label: 'Menge *',
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Helper class to manage state for each defect card
+class DefectCardState {
+  final List<String> selectedIssues = [];
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController(text: '1');
 }

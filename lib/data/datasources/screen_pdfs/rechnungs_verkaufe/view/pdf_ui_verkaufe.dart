@@ -10,9 +10,28 @@ Future<pw.Widget> buildPdfContent(
   final ByteData bytes = await rootBundle.load('assets/images/pdf.png');
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
-  final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
-  final double tax = double.parse((netAmount / 1.19).toStringAsFixed(2));
-  final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2));
+  // Calculate totals from defects list
+  double totalAmount = 0;
+  final List<dynamic> defects = data['defects'] ?? [];
+
+  // Fallback for old data structure if defects is empty/missing but legacy fields exist
+  if (defects.isEmpty && data['issue'] != null) {
+      defects.add({
+        'issue': data['issue'],
+        'price': data['price'] ?? 0,
+        'quantity': data['quantity'] ?? 1,
+      });
+  }
+
+  for (var defect in defects) {
+    double price = double.tryParse(defect['price'].toString()) ?? 0;
+    int quantity = int.tryParse(defect['quantity'].toString()) ?? 1;
+    totalAmount += price * quantity;
+  }
+
+  final double netAmount = totalAmount; // This is the total Gross amount (Input)
+  final double tax = double.parse((netAmount / 1.19).toStringAsFixed(2)); // This is actually the Net amount
+  final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2)); // This is the Tax amount
   final NumberFormat currencyFormat = NumberFormat('#,##0.00', 'de_DE');
 
   // final serial = int.tryParse(auftragNr.split('/').last) ?? 0;
@@ -32,74 +51,49 @@ Future<pw.Widget> buildPdfContent(
 
       PdfWidgets.buildTableHeader(),
       pw.SizedBox(height: 6),
-        if (data['items'] != null && (data['items'] as List).isNotEmpty)
-          ...(data['items'] as List).map((item) {
-            final double itemPrice = double.tryParse(item['price'].toString()) ?? 0;
-            final double itemNet = double.parse((itemPrice / 1.19).toStringAsFixed(2));
-            final String itemIssues = (item['issues'] as List<dynamic>?)?.join(', ') ?? '';
-            final String itemQty = (item['quantity'] ?? 1).toString();
+      
+      // Render defect items
+      ...defects.asMap().entries.map((entry) {
+        int index = entry.key;
+        var defect = entry.value;
+        bool isLast = (index == defects.length - 1);
+        
+        double price = double.tryParse(defect['price'].toString()) ?? 0;
+        int quantity = int.tryParse(defect['quantity'].toString()) ?? 1;
+        
+        final double itemGross = price * quantity;
+        final double itemNet = double.parse((itemGross / 1.19).toStringAsFixed(2));
 
-            return pw.Column(
+        return pw.Column(
+          children: [
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Container(
-                      width: 180,
-                      child: pw.Text(
-                        '$itemIssues ${data['deviceType']} ${data['deviceModel']}.',
-                        style: pw.TextStyle(
-                            fontSize: 10, fontWeight: pw.FontWeight.bold),
-                        softWrap: true,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.only(right: 90),
-                      child: pw.Text(
-                        itemQty,
-                        style: pw.TextStyle(
-                            fontSize: 14, fontWeight: pw.FontWeight.bold),
-                      ),
-                    ),
-                    pw.Text(
-                      '${currencyFormat.format(itemNet)} ',
-                      style: pw.TextStyle(
-                          fontSize: 14, fontWeight: pw.FontWeight.bold),
-                    ),
-                  ],
+                pw.Container(
+                  width: 180,
+                  child: pw.Text(
+                    '${defect['issue']} ${data['deviceType']} ${data['deviceModel']}${isLast ? '.' : ''}',
+                    style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                    softWrap: true,
+                  ),
                 ),
-                pw.SizedBox(height: 5),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(right: 90),
+                  child: pw.Text(
+                    '$quantity',
+                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                  ),
+                ),
+                pw.Text(
+                  '${currencyFormat.format(itemNet)} ',
+                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                ),
               ],
-            );
-          }).toList()
-        else
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Container(
-                width: 180,
-                child: pw.Text(
-                  '${data['issue']} ${data['deviceType']} ${data['deviceModel']}.',
-                  style: pw.TextStyle(
-                      fontSize: 10, fontWeight: pw.FontWeight.bold),
-                  softWrap: true,
-                ),
-              ),
-              pw.Padding(
-                padding: const pw.EdgeInsets.only(right: 90),
-                child: pw.Text(
-                  '${data['quantity'] ?? 1}', // Use dynamic quantity
-                  style: pw.TextStyle(
-                      fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-              ),
-              pw.Text(
-                '${currencyFormat.format(tax)} ',
-                style:
-                    pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-              ),
-            ],
-          ),
+            ),
+            pw.SizedBox(height: 5),
+          ],
+        );
+      }).toList(),
       pw.Divider(thickness: 1),
 
       pw.SizedBox(height: 5),

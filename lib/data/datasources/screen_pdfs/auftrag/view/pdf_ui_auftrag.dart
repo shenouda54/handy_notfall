@@ -28,12 +28,16 @@ Future<pw.Widget> buildPdfContent(
       ),
       PdfWidgets.buildTableHeader(),
       pw.SizedBox(height: 6),
-        if (data['items'] != null && (data['items'] as List).isNotEmpty)
-          ...(data['items'] as List).map((item) {
-            final double itemPrice = double.tryParse(item['price'].toString()) ?? 0;
+        if (data['defects'] != null && (data['defects'] as List).isNotEmpty)
+          ...(data['defects'] as List).asMap().entries.map((entry) {
+            int index = entry.key;
+            var defect = entry.value;
+            bool isLast = (index == (data['defects'] as List).length - 1);
+            
+            final double itemPrice = double.tryParse(defect['price'].toString()) ?? 0;
             final double itemNet = double.parse((itemPrice / 1.19).toStringAsFixed(2));
-            final String itemIssues = (item['issues'] as List<dynamic>?)?.join(', ') ?? '';
-            final String itemQty = (item['quantity'] ?? 1).toString();
+            final String itemIssue = defect['issue'] ?? '';
+            final String itemQty = (defect['quantity'] ?? 1).toString();
 
             return pw.Column(
               children: [
@@ -43,7 +47,7 @@ Future<pw.Widget> buildPdfContent(
                     pw.Container(
                       width: 180,
                       child: pw.Text(
-                        '$itemIssues ${data['deviceType']} ${data['deviceModel']} inkl. Montage',
+                        '$itemIssue ${data['deviceType']} ${data['deviceModel']}${isLast ? ' inkl. Montage' : ''}',
                         style: pw.TextStyle(
                             fontSize: 10, fontWeight: pw.FontWeight.bold),
                         softWrap: true,

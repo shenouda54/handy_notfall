@@ -22,6 +22,7 @@ class CustomerModel {
   int? kundennummer; // رقم العميل
   String? auftragNr; // رقم الطلب
   String? rechnungCode; // كود الفاتورة/الفواتير
+  List<Map<String, dynamic>> defects; // New field for multiple defects
 
   CustomerModel({
     this.id = '',
@@ -37,6 +38,7 @@ class CustomerModel {
     required this.pinCode,
     required this.price,
     this.quantity = 1,
+    this.defects = const [],
     required this.userEmail,
     this.printId,
     this.kundennummer,
@@ -49,6 +51,19 @@ class CustomerModel {
         endDate = endDate ?? Timestamp.now();
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
+    // Handle new defects field with fallback to old structure
+    List<Map<String, dynamic>> defectsList = [];
+    if (json['defects'] != null) {
+      defectsList = List<Map<String, dynamic>>.from(json['defects']);
+    } else {
+      // Fallback for old data
+      defectsList.add({
+        'issue': json['issue'] ?? '',
+        'price': json['price'] ?? 0,
+        'quantity': json['quantity'] ?? 1,
+      });
+    }
+
     return CustomerModel(
       id: json['id'] ?? '',
       customerFirstName: json['customerFirstName'],
@@ -58,11 +73,12 @@ class CustomerModel {
       emailAddress: json['emailAddress'],
       deviceType: json['deviceType'],
       deviceModel: json['deviceModel'],
-      issue: json['issue'],
+      issue: json['issue'] ?? '',
       serialNumber: json['serialNumber'],
       pinCode: json['pinCode'],
-      price: json['price'],
+      price: json['price'] ?? 0,
       quantity: json['quantity'] ?? 1,
+      defects: defectsList,
       userEmail: json['userEmail'] ?? '',
       startDate: json['startDate'] != null ? json['startDate'] as Timestamp : Timestamp.now(),
       endDate: json['endDate'] != null ? json['endDate'] as Timestamp : Timestamp.now(),
@@ -89,6 +105,7 @@ class CustomerModel {
       "pinCode": pinCode,
       "price": price,
       "quantity": quantity,
+      "defects": defects,
       "startDate": startDate,
       "endDate": endDate,
       "isDone": isDone,
