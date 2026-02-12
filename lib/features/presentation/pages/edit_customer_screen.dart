@@ -4,6 +4,7 @@ import 'package:handy_notfall/core/widgets/custom_input_field.dart';
 import 'package:handy_notfall/core/widgets/date_picker_field.dart';
 import 'package:handy_notfall/core/widgets/issue_selection.dart';
 import 'package:handy_notfall/core/widgets/device_type_selection.dart';
+import 'package:handy_notfall/core/widgets/defect_card.dart';
 import 'package:intl/intl.dart';
 
 class EditCustomerScreen extends StatefulWidget {
@@ -20,8 +21,6 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   final TextEditingController modelController = TextEditingController();
   final TextEditingController serialNumberController = TextEditingController();
   final TextEditingController pinCodeController = TextEditingController();
-  final TextEditingController repairPriceController = TextEditingController();
-  final TextEditingController quantityController = TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   final TextEditingController customIssueController = TextEditingController();
@@ -33,7 +32,9 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   final TextEditingController emailController = TextEditingController();
 
   List<String> selectedDeviceTypes = [];
-  List<String> selectedIssues = [];
+  
+  // Dynamic list for defect cards
+  List<DefectCardState> defectCards = [];
   bool isLocked = false;
 
   final List<String> deviceTypes = [
@@ -80,16 +81,53 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
         modelController.text = data['deviceModel'] ?? '';
         serialNumberController.text = data['serialNumber'] ?? '';
         pinCodeController.text = data['pinCode'] ?? '';
-        repairPriceController.text = data['price'].toString();
-        quantityController.text = (data['quantity'] ?? 1).toString();
+        
         selectedDeviceTypes = (data['deviceType'] as String)
             .split(', ')
             .where((e) => e.isNotEmpty)
             .toList();
-        selectedIssues = (data['issue'] as String)
-            .split(', ')
-            .where((e) => e.isNotEmpty)
-            .toList();
+        
+        // Load defects and populate cards
+        defectCards.clear();
+        if (data['defects'] != null && data['defects'] is List) {
+          var defectsList = (data['defects'] as List);
+          for (var item in defectsList) {
+            var defectMap = item as Map<String, dynamic>;
+            var card = DefectCardState();
+            
+            // Set issues
+            String issueStr = defectMap['issue'] ?? '';
+            if (issueStr.isNotEmpty) {
+              card.selectedIssues.addAll(
+                issueStr.split(', ').where((e) => e.isNotEmpty)
+              );
+            }
+            
+            // Set price and quantity
+            card.priceController.text = (defectMap['price'] ?? 0).toString();
+            card.quantityController.text = (defectMap['quantity'] ?? 1).toString();
+            
+            defectCards.add(card);
+          }
+        } else {
+          // Fallback for old data structure
+          var card = DefectCardState();
+          String issueStr = data['issue'] ?? '';
+          if (issueStr.isNotEmpty) {
+            card.selectedIssues.addAll(
+              issueStr.split(', ').where((e) => e.isNotEmpty)
+            );
+          }
+          card.priceController.text = (data['price'] ?? 0).toString();
+          card.quantityController.text = (data['quantity'] ?? 1).toString();
+          defectCards.add(card);
+        }
+        
+        // Ensure at least one card exists
+        if (defectCards.isEmpty) {
+          defectCards.add(DefectCardState());
+        }
+
         startDateController.text = DateFormat('yyyy-MM-dd')
             .format((data['startDate'] as Timestamp).toDate());
         endDateController.text = DateFormat('yyyy-MM-dd')
@@ -120,6 +158,20 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
     }
 
     try {
+      // Collect defects from all cards
+      List<Map<String, dynamic>> defectsData = defectCards.map((card) {
+        return {
+          'issue': card.selectedIssues.join(', '),
+          'price': int.tryParse(card.priceController.text.trim()) ?? 0,
+          'quantity': int.tryParse(card.quantityController.text.trim()) ?? 1,
+        };
+      }).toList();
+
+      // For backward compatibility, use the first defect's data
+      var firstDefect = defectsData.isNotEmpty 
+          ? defectsData.first 
+          : {'issue': '', 'price': 0, 'quantity': 1};
+
       await FirebaseFirestore.instance
           .collection('Customers')
           .doc(widget.customerId)
@@ -133,9 +185,11 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
         'deviceModel': modelController.text.trim(),
         'serialNumber': serialNumberController.text.trim(),
         'pinCode': pinCodeController.text.trim(),
-        'issue': selectedIssues.join(', '),
-        'price': int.tryParse(repairPriceController.text.trim()) ?? 0,
-        'quantity': int.tryParse(quantityController.text.trim()) ?? 1,
+        'defects': defectsData,
+        // Keep backward compatibility
+        'issue': firstDefect['issue'],
+        'price': firstDefect['price'],
+        'quantity': firstDefect['quantity'],
         'startDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(startDateController.text)),
         'endDate': Timestamp.fromDate(DateFormat('yyyy-MM-dd').parse(endDateController.text)),
       });
@@ -231,36 +285,53 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               const SizedBox(height: 12),
               CustomInputField(controller: pinCodeController, label: "Speer/Pin Code", enabled: !isLocked),
               const SizedBox(height: 12),
-              IssueSelection(
-                issueOptions: issueOptions,
-                selectedIssues: selectedIssues,
-                customIssueController: customIssueController,
-                onAddIssue: (issue) {
-                  setState(() {
-                    if (!selectedIssues.contains(issue)) selectedIssues.add(issue);
-                  });
-                },
-                onRemoveIssue: (issue) {
-                  if (isLocked) return;
-                  setState(() {
-                    selectedIssues.remove(issue);
-                  });
-                },
-                enabled: !isLocked, // Add enabled prop to IssueSelection
-              ),
-              const SizedBox(height: 12),
-              CustomInputField(
-                controller: repairPriceController,
-                label: ' Reparatur Preis ',
-                keyboardType: TextInputType.number,
-                enabled: !isLocked,
-              ),
-              const SizedBox(height: 12),
-              CustomInputField(
-                controller: quantityController,
-                label: ' Menge ',
-                keyboardType: TextInputType.number,
-                enabled: !isLocked,
+              // Defect Cards Section
+              ...defectCards.asMap().entries.map((entry) {
+                int index = entry.key;
+                DefectCardState card = entry.value;
+                return Column(
+                  children: [
+                    DefectCard(
+                      index: index,
+                      cardState: card,
+                      issueOptions: issueOptions,
+                      customIssueController: customIssueController,
+                      isLocked: isLocked,
+                      showDelete: defectCards.length > 1,
+                      onDelete: () {
+                          setState(() {
+                            defectCards.removeAt(index);
+                          });
+                      },
+                      onAddIssue: (issue) {
+                          setState(() {
+                            if (!card.selectedIssues.contains(issue)) {
+                              card.selectedIssues.add(issue);
+                            }
+                          });
+                      },
+                      onRemoveIssue: (issue) {
+                          setState(() {
+                            card.selectedIssues.remove(issue);
+                          });
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                  ],
+                );
+              }).toList(),
+              // Add button
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(Icons.add_circle, color: Colors.green, size: 32),
+                  onPressed: () {
+                    if (isLocked) return;
+                    setState(() {
+                      defectCards.add(DefectCardState());
+                    });
+                  },
+                ),
               ),
               const SizedBox(height: 12),
               DatePickerField(controller: endDateController, label: 'Abholung ', enabled: !isLocked),
