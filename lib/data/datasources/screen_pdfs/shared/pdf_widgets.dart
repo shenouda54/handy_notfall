@@ -133,18 +133,25 @@ class PdfWidgets {
           right: pw.BorderSide(width: 1),
         ),
       ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      child: pw.Table(
+        columnWidths: const {
+          0: pw.FlexColumnWidth(4), // Description column
+          1: pw.FixedColumnWidth(130), // Menge column - increased to shift left
+          2: pw.FixedColumnWidth(140), // Betrag column - increased to shift left
+        },
         children: [
-          pw.Text('Beschreibung',
-              style:
-                  pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-          pw.Text('Menge',
-              style:
-                  pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-          pw.Text('Betrag',
-              style:
-                  pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+          pw.TableRow(
+            children: [
+              pw.Text('Beschreibung',
+                  style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Menge',
+                  style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+                  textAlign: pw.TextAlign.center),
+              pw.Text('Betrag',
+                  style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+                  textAlign: pw.TextAlign.right),
+            ],
+          ),
         ],
       ),
     );

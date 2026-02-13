@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../shared/pdf_widgets.dart';
 
 Future<pw.Widget> buildPdfContent(
@@ -33,7 +32,7 @@ Future<pw.Widget> buildPdfContent(
   final double grossAmount = double.parse((netAmount - tax).toStringAsFixed(2)); // This is the Tax amount
   final NumberFormat currencyFormat = NumberFormat('#,##0.00', 'de_DE');
 
-  final serial = int.tryParse(auftragNr.split('/').last) ?? 0;
+
 
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -58,24 +57,28 @@ Future<pw.Widget> buildPdfContent(
       pw.SizedBox(height: 3),
       
       // Render defect items
-      ...defects.asMap().entries.map((entry) {
-        int index = entry.key;
-        var defect = entry.value;
-        bool isLast = (index == defects.length - 1);
-        
-        double price = double.tryParse(defect['price'].toString()) ?? 0;
-        int quantity = int.tryParse(defect['quantity'].toString()) ?? 1;
-        
-        final double itemGross = price * quantity;
-        final double itemNet = double.parse((itemGross / 1.19).toStringAsFixed(2));
+      // Render defects table
+      pw.Table(
+        columnWidths: {
+          0: const pw.FlexColumnWidth(4), // Description column
+          1: const pw.FixedColumnWidth(130), // Menge column
+          2: const pw.FixedColumnWidth(140), // Betrag column
+        },
+        children: defects.asMap().entries.map((entry) {
+            int index = entry.key;
+            var defect = entry.value;
+            bool isLast = (index == defects.length - 1);
+            
+            double price = double.tryParse(defect['price'].toString()) ?? 0;
+            int quantity = int.tryParse(defect['quantity'].toString()) ?? 1;
+            
+            final double itemGross = price * quantity;
+            final double itemNet = double.parse((itemGross / 1.19).toStringAsFixed(2));
 
-        return pw.Column(
-          children: [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            return pw.TableRow(
               children: [
-                pw.Container(
-                  width: 180,
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 5),
                   child: pw.Text(
                     '${defect['issue']} ${data['deviceType']} ${data['deviceModel']}${isLast ? ' inkl. Montage' : ''}',
                     style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
@@ -83,20 +86,23 @@ Future<pw.Widget> buildPdfContent(
                   ),
                 ),
                 pw.Padding(
-                  padding: const pw.EdgeInsets.only(right: 90),
+                  padding: const pw.EdgeInsets.only(bottom: 5),
                   child: pw.Text(
                     '$quantity',
                     style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    textAlign: pw.TextAlign.center,
                   ),
                 ),
-                pw.Text('${currencyFormat.format(itemNet)} ',
-                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 5),
+                  child: pw.Text('${currencyFormat.format(itemNet)} ',
+                      style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                      textAlign: pw.TextAlign.right),
+                ),
               ],
-            ),
-            pw.SizedBox(height: 5),
-          ],
-        );
-      }).toList(),
+            );
+        }).toList(),
+      ),
       pw.Divider(thickness: 1),
 
       pw.SizedBox(height: 5),

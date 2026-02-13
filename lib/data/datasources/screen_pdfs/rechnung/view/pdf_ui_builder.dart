@@ -51,46 +51,54 @@ Future<pw.Widget> buildPdfContent(
       PdfWidgets.buildTableHeader(),
       pw.SizedBox(height: 6),
       
-      // Render defect items
-      ...defects.asMap().entries.map((entry) {
-        int index = entry.key;
-        var defect = entry.value;
-        bool isLast = (index == defects.length - 1);
-        
-        double price = double.tryParse(defect['price'].toString()) ?? 0;
-        int quantity = int.tryParse(defect['quantity'].toString()) ?? 1;
-        
-        final double itemGross = price * quantity;
-        final double itemNet = double.parse((itemGross / 1.19).toStringAsFixed(2));
+      // Render defects table
+      pw.Table(
+        columnWidths: {
+          0: const pw.FlexColumnWidth(4), // Description column
+          1: const pw.FixedColumnWidth(130), // Menge column - increased to shift left
+          2: const pw.FixedColumnWidth(140), // Betrag column - increased to shift left
+        },
+        children: defects.asMap().entries.map((entry) {
+          int index = entry.key;
+          var defect = entry.value;
+          bool isLast = (index == defects.length - 1);
+          
+          double price = double.tryParse(defect['price'].toString()) ?? 0;
+          int quantity = int.tryParse(defect['quantity'].toString()) ?? 1;
+          
+          final double itemGross = price * quantity;
+          final double itemNet = double.parse((itemGross / 1.19).toStringAsFixed(2));
 
-        return pw.Column(
-          children: [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Container(
-                  width: 180,
-                  child: pw.Text(
-                    '${defect['issue']} ${data['deviceType']} ${data['deviceModel']}${isLast ? ' inkl. Montage' : ''}',
-                    style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-                    softWrap: true,
-                  ),
+          return pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 5),
+                child: pw.Text(
+                  '${defect['issue']} ${data['deviceType']} ${data['deviceModel']}${isLast ? ' inkl. Montage' : ''}',
+                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                  softWrap: true,
                 ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.only(right: 90),
-                  child: pw.Text(
-                    '$quantity',
-                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                  ),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 5),
+                child: pw.Text(
+                  '$quantity',
+                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                  textAlign: pw.TextAlign.center,
                 ),
-                pw.Text('${currencyFormat.format(itemNet)} ',
-                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-              ],
-            ),
-            pw.SizedBox(height: 5),
-          ],
-        );
-      }).toList(),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 5),
+                child: pw.Text(
+                  '${currencyFormat.format(itemNet)} ',
+                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                  textAlign: pw.TextAlign.right,
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
       
       pw.Divider(thickness: 1),
 

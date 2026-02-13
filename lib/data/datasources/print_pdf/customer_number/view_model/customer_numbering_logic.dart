@@ -50,20 +50,6 @@ class CustomerNumberingService {
     }
     
     // تجهيز رقم الطلب (AuftragNr)
-    final currentYear = DateTime.now().year;
-    final yearSuffix = currentYear.toString().substring(3); // e.g. "6" from 2026? Wait, code says substring(3) of 2025 is "5". 
-    // Correction: substring(2) is last 2 digits. previous code was using substring(3) which is only the last digit? 
-    // wait, existing logic says: final yearSuffix = currentYear.toString().substring(3); -> if 2025 -> "5".
-    // But formats are like "25/...".
-    // Let's look at previous code: `startsWith('$yearSuffix/')`. 
-    // If yearSuffix was just "5", it matches "5/..." which is weird.
-    // Let's stick to standard "YY".
-    // Actually, looking at the previous file content (Step 30):
-    // line 54: final yearSuffix = currentYear.toString().substring(3);
-    // If 2025 -> returns "5". That looks wrong if we want "25". 
-    // HOWEVER, the user said "26/..." so it must be 2 digits.
-    // Let's fix it to be consistently 2 digits: substring(2).
-    
     // UPDATED LOGIC: Continuous increment
     // 1. Get ALL customers for this user (to find the absolute max, regardless of year)
     final auftragNrSnapshot = await FirebaseFirestore.instance
@@ -96,7 +82,7 @@ class CustomerNumberingService {
     List<Map<String, dynamic>> updatedDevices = [];
 
     // دالة مساعدة لتحديث جهاز واحد
-    Future<void> updateDevice(DocumentReference ref, Map<String, dynamic> data) async {
+    Future<void> updateDevice(DocumentReference ref, Map<String, dynamic> data, String docId) async {
        String finalAuftragNr;
        String? existingAuftrag = data['auftragNr']?.toString();
        
@@ -116,6 +102,7 @@ class CustomerNumberingService {
        
        data['kundennummer'] = newKundennummer;
        data['auftragNr'] = finalAuftragNr;
+       data['docId'] = docId; // إضافة الـ document ID للجهاز
        updatedDevices.add(data);
     }
 
@@ -123,7 +110,7 @@ class CustomerNumberingService {
     for (final doc in snapshot.docs) {
       // لو الجهاز القديم هو نفسه الحالي (ظهر في البحث)، هنحدثه هنا
       if (currentDocId != null && doc.id == currentDocId) continue; 
-      await updateDevice(doc.reference, doc.data());
+      await updateDevice(doc.reference, doc.data(), doc.id);
     }
 
     // 2. تحديث الجهاز الحالي (لو باعتين الـ ID بتاعه) - ده المهم!
@@ -134,8 +121,20 @@ class CustomerNumberingService {
       if (currentDocHelp.exists) {
          // تأكد إننا مش بنحدثه مرتين (لو كان ظهر في اللوب فوق وعملنا continue)
          // اللوجيك فوق عمل skip لو الـ ID مطابق، فـ هنا أمان
-         await updateDevice(currentDocRef, currentDocHelp.data()!);
+         await updateDevice(currentDocRef, currentDocHelp.data()!, currentDocId);
       }
+    }
+
+    // 3. Auto-select first device if no device is selected
+    bool hasSelectedDevice = updatedDevices.any((device) => device['isSelectedDevice'] == true);
+    if (!hasSelectedDevice && updatedDevices.isNotEmpty) {
+      // Select the first device
+      final firstDeviceId = updatedDevices[0]['docId'];
+      await FirebaseFirestore.instance
+          .collection('Customers')
+          .doc(firstDeviceId)
+          .update({'isSelectedDevice': true});
+      updatedDevices[0]['isSelectedDevice'] = true;
     }
 
     String message;
@@ -151,6 +150,58 @@ class CustomerNumberingService {
       "kundennummer": newKundennummer,
       "devices": updatedDevices
     };
+  }
+
+  /// Selects a specific device as the active device for a customer
+  /// Deselects all other devices with the same customer name and phone
+  static Future<Map<String, dynamic>> selectDevice({
+    required String deviceId,
+    required String customerName,
+    required String customerPhone,
+  }) async {
+    try {
+      // 1. Find all devices for this customer
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Customers')
+          .where('customerFirstName', isEqualTo: customerName)
+          .where('phoneNumber', isEqualTo: customerPhone)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return {
+          "success": false,
+          "message": "❌ Keine Geräte für diesen Kunden gefunden."
+        };
+      }
+
+      // 2. Update all devices: set isSelectedDevice = false for all
+      final batch = FirebaseFirestore.instance.batch();
+      
+      for (final doc in snapshot.docs) {
+        batch.update(doc.reference, {'isSelectedDevice': false});
+      }
+
+      // 3. Set isSelectedDevice = true for the selected device
+      final selectedDeviceRef = FirebaseFirestore.instance
+          .collection('Customers')
+          .doc(deviceId);
+      
+      batch.update(selectedDeviceRef, {'isSelectedDevice': true});
+
+      // 4. Commit all changes
+      await batch.commit();
+
+      return {
+        "success": true,
+        "message": "✅ Gerät erfolgreich ausgewählt.",
+        "selectedDeviceId": deviceId
+      };
+    } catch (e) {
+      return {
+        "success": false,
+        "message": "❌ Fehler beim Auswählen des Geräts: $e"
+      };
+    }
   }
 }
 

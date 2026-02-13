@@ -24,10 +24,36 @@ class CustomerDetailsScreen extends StatefulWidget {
 class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   Future<DocumentSnapshot> fetchCustomerDetails() async {
     try {
-      return await FirebaseFirestore.instance
+      // 1. First, get the initial customer data to extract name and phone
+      final initialDoc = await FirebaseFirestore.instance
           .collection('Customers')
           .doc(widget.customerId)
           .get();
+      
+      if (!initialDoc.exists) {
+        throw Exception('Customer not found');
+      }
+      
+      final initialData = initialDoc.data() as Map<String, dynamic>;
+      final customerName = initialData['customerFirstName'];
+      final customerPhone = initialData['phoneNumber'];
+      
+      // 2. Query for the selected device for this customer
+      final selectedDeviceQuery = await FirebaseFirestore.instance
+          .collection('Customers')
+          .where('customerFirstName', isEqualTo: customerName)
+          .where('phoneNumber', isEqualTo: customerPhone)
+          .where('isSelectedDevice', isEqualTo: true)
+          .limit(1)
+          .get();
+      
+      // 3. If a selected device exists, return it; otherwise return the initial doc
+      if (selectedDeviceQuery.docs.isNotEmpty) {
+        return selectedDeviceQuery.docs.first;
+      } else {
+        // Fallback: no selected device, return the initial document
+        return initialDoc;
+      }
     } catch (e) {
       throw Exception('Failed to load customer data: $e');
     }
@@ -59,6 +85,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         }
 
         var data = snapshot.data!.data() as Map<String, dynamic>;
+        final selectedDeviceId = snapshot.data!.id; // The actual selected device ID
 
         return Scaffold(
           appBar: AppBar(
@@ -115,7 +142,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 ], theme),
                 
                 const SizedBox(height: 30),
-                _buildActionButtons(context, data, widget.customerId, theme),
+                _buildActionButtons(context, data, selectedDeviceId, theme),
                 const SizedBox(height: 20),
               ],
             ),
