@@ -35,7 +35,8 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   
   // Dynamic list for defect cards
   List<DefectCardState> defectCards = [];
-  bool isLocked = false;
+  bool hasRechnungCode = false;
+  bool isEditingEnabled = true;
 
   final List<String> deviceTypes = [
     'Dell', 'Apple', 'Samsung', 'HP', 'Lenovo', 'Sony', 'LG', 'Huawei',
@@ -134,7 +135,8 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
             .format((data['endDate'] as Timestamp).toDate());
         
         final rechnungCode = data['rechnungCode']?.toString();
-        isLocked = rechnungCode != null && rechnungCode.isNotEmpty;
+        hasRechnungCode = rechnungCode != null && rechnungCode.isNotEmpty;
+        isEditingEnabled = !hasRechnungCode; // Default to locked if invoice exists
       });
     } catch (e) {
       debugPrint("Error loading customer data: $e");
@@ -221,44 +223,97 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Kundendaten ändern")),
+      appBar: AppBar(
+        title: const Text("Kundendaten ändern"),
+        actions: [
+          if (hasRechnungCode)
+            IconButton(
+              icon: Icon(isEditingEnabled ? Icons.lock_open : Icons.lock),
+              color: isEditingEnabled ? Colors.green : Colors.red,
+              tooltip: isEditingEnabled ? "Bearbeitung aktiv" : "Bearbeitung gesperrt",
+              onPressed: () {
+                if (!isEditingEnabled) {
+                  // Show confirmation dialog to unlock
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text("Bearbeitung freigeben?"),
+                      content: const Text(
+                        "Für diesen Kunden wurde bereits eine Rechnung erstellt.\n\n"
+                        "Möchten Sie die Daten trotzdem ändern? (z.B. Tippfehler korrigieren)",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text("Abbrechen"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            setState(() {
+                              isEditingEnabled = true;
+                            });
+                          },
+                          child: const Text("Ja, freigeben"),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  // Lock again manually if desired
+                  setState(() {
+                    isEditingEnabled = false;
+                  });
+                }
+              },
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              if (isLocked)
+              if (hasRechnungCode)
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    border: Border.all(color: Colors.red),
+                    color: isEditingEnabled ? Colors.orange.shade50 : Colors.red.shade50,
+                    border: Border.all(color: isEditingEnabled ? Colors.orange : Colors.red),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.lock, color: Colors.red),
-                      SizedBox(width: 12),
+                      Icon(
+                        isEditingEnabled ? Icons.warning_amber_rounded : Icons.lock, 
+                        color: isEditingEnabled ? Colors.orange : Colors.red
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          "Bearbeitung gesperrt: Rechnung wurde bereits erstellt.",
-                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          isEditingEnabled
+                              ? "Achtung: Rechnung existiert bereits. Änderungen nur für Korrekturen!"
+                              : "Bearbeitung gesperrt: Rechnung wurde bereits erstellt.",
+                          style: TextStyle(
+                            color: isEditingEnabled ? Colors.orange[900] : Colors.red, 
+                            fontWeight: FontWeight.bold
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              CustomInputField(controller: firstNameController, label: "Vor- und Nachname", enabled: !isLocked),
+              CustomInputField(controller: firstNameController, label: "Vor- und Nachname", enabled: isEditingEnabled),
               const SizedBox(height: 12),
-              CustomInputField(controller: phoneController, label: "Telefonnummer", enabled: !isLocked),
+              CustomInputField(controller: phoneController, label: "Telefonnummer", enabled: isEditingEnabled),
               const SizedBox(height: 12),
-              CustomInputField(controller: addressController, label: "PLZ & Wohnort", enabled: !isLocked),
+              CustomInputField(controller: addressController, label: "PLZ & Wohnort", enabled: isEditingEnabled),
               const SizedBox(height: 12),
-              CustomInputField(controller: cityController, label: "Straße & Hausnummer ", enabled: !isLocked),
+              CustomInputField(controller: cityController, label: "Straße & Hausnummer ", enabled: isEditingEnabled),
               const SizedBox(height: 12),
-              CustomInputField(controller: emailController, label: "E-Mail des Empfängers ", enabled: !isLocked),
+              CustomInputField(controller: emailController, label: "E-Mail des Empfängers ", enabled: isEditingEnabled),
               const SizedBox(height: 12),
               DeviceTypeSelection(
                 deviceTypes: deviceTypes,
@@ -276,14 +331,14 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                   });
                 },
                 customDeviceController: customDeviceController,
-                enabled: !isLocked, // Add enabled prop to DeviceTypeSelection
+                enabled: isEditingEnabled,
               ),
               const SizedBox(height: 12),
-              CustomInputField(controller: modelController, label: "Modellnummer ", enabled: !isLocked),
+              CustomInputField(controller: modelController, label: "Modellnummer ", enabled: isEditingEnabled),
               const SizedBox(height: 12),
-              CustomInputField(controller: serialNumberController, label: " Seriennummer", enabled: !isLocked),
+              CustomInputField(controller: serialNumberController, label: " Seriennummer", enabled: isEditingEnabled),
               const SizedBox(height: 12),
-              CustomInputField(controller: pinCodeController, label: "Speer/Pin Code", enabled: !isLocked),
+              CustomInputField(controller: pinCodeController, label: "Speer/Pin Code", enabled: isEditingEnabled),
               const SizedBox(height: 12),
               // Defect Cards Section
               ...defectCards.asMap().entries.map((entry) {
@@ -296,7 +351,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                       cardState: card,
                       issueOptions: issueOptions,
                       customIssueController: customIssueController,
-                      isLocked: isLocked,
+                      isLocked: !isEditingEnabled,
                       showDelete: defectCards.length > 1,
                       onDelete: () {
                           setState(() {
@@ -326,7 +381,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.add_circle, color: Colors.green, size: 32),
                   onPressed: () {
-                    if (isLocked) return;
+                    if (!isEditingEnabled) return;
                     setState(() {
                       defectCards.add(DefectCardState());
                     });
@@ -334,12 +389,12 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              DatePickerField(controller: endDateController, label: 'Abholung ', enabled: !isLocked),
+              DatePickerField(controller: endDateController, label: 'Abholung ', enabled: isEditingEnabled),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: isLocked ? null : _updateCustomer,
+                onPressed: !isEditingEnabled ? null : _updateCustomer,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isLocked ? Colors.grey : null,
+                  backgroundColor: !isEditingEnabled ? Colors.grey : null,
                 ),
                 child: const Text(" Änderungen speichern"),
               ),
