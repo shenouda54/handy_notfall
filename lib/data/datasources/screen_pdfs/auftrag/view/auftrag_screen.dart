@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:handy_notfall/core/widgets/error_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:handy_notfall/core/widgets/print_dialog_helper.dart';
 import 'package:handy_notfall/data/datasources/screen_pdfs/auftrag/view_model/pdf_logic.dart';
 class AuftragScreen extends StatelessWidget {
   final String customerId;
@@ -63,9 +65,32 @@ class AuftragScreen extends StatelessWidget {
           return Center(
             child: ElevatedButton(
               onPressed: () async {
-                await generatePdf(data, context, auftragNr);
+                // Show dialog to choose action
+                final action = await PrintDialogHelper.showPrintOptionsDialog(context);
+
+                if (action == null) return;
+
+                // Determine Recipient
+                String? targetEmail;
+                bool sendEmail = false;
+
+                if (action == 'email_me') {
+                  targetEmail = FirebaseAuth.instance.currentUser?.email;
+                  sendEmail = true;
+                } else if (action == 'email_customer') {
+                  targetEmail = data['emailAddress']; // Ensure this matches Firestore key
+                  sendEmail = true;
+                }
+
+                await generatePdf(
+                  data, 
+                  context, 
+                  auftragNr,
+                  sendEmail: sendEmail,
+                  userEmail: targetEmail,
+                );
               },
-              child: const Text("📄 Download Auftrag"),
+              child: const Text("📄 خيارات Auftrag"),
             ),
           );
         },

@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:handy_notfall/core/widgets/print_dialog_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/data/datasources/screen_pdfs/rechnung_handy/view_model/pdf_logic.dart';
 import 'package:handy_notfall/data/datasources/print_pdf/rechnung_number/view_model/rechnung_numbering_logic.dart';
@@ -57,27 +59,20 @@ class RechnungHandyScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 40),
 
-                // 2) زر الطباعة (اللوجيك القديم مع الكونديشن)
+                // 2) زر الطباعة (توليد كود وطباعة أو إرسال إيميل)
                 IconButton(
                   onPressed: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text("تأكيد"),
-                        content: const Text(
-                            "هل تريد توليد وطباعـة كود Rechnung لهذا الطلب؟"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(false),
-                            child: const Text("لا"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(true),
-                            child: const Text("نعم"),
-                          ),
-                        ],
-                      ),
-                    );
+                    // Show dialog to choose action
+                    final action = await PrintDialogHelper.showPrintOptionsDialog(context);
+
+                    if (action == null) return;
+
+                    // Determine target string for confirmation message
+                    String actionText = "طباعة";
+                    if (action == 'email_me') actionText = "وإرسال (لي)";
+                    if (action == 'email_customer') actionText = "وإرسال (للعميل)";
+
+                    final confirm = await PrintDialogHelper.showConfirmationDialog(context, actionText, "Rechnung");
 
                     if (confirm != true) return;
 
@@ -93,7 +88,36 @@ class RechnungHandyScreen extends StatelessWidget {
                     if (result["success"] == true &&
                         code != null &&
                         code.isNotEmpty) {
-                      await generatePdf(data, context, code);
+                      
+                      // 2. Determine Recipient and Generate PDF
+                      String? targetEmail;
+                      bool sendEmail = false;
+
+                      if (action == 'email_me') {
+                        targetEmail = FirebaseAuth.instance.currentUser?.email;
+                        sendEmail = true;
+                      } else if (action == 'email_customer') {
+                        targetEmail = data['emailAddress']; // Ensure this matches Firestore key
+                        sendEmail = true;
+                      }
+                      
+                      // If a NEW code was generated (and thus endDate updated), fetch fresh data
+                      Map<String, dynamic> dataToUse = data;
+                      if (result["isNew"] == true) {
+                        try {
+                          dataToUse = await fetchCustomerData();
+                        } catch (e) {
+                          print("Error fetching updated data: $e");
+                        }
+                      }
+
+                      await generatePdf(
+                        dataToUse, 
+                        context, 
+                        code,
+                        sendEmail: sendEmail,
+                        userEmail: targetEmail,
+                      );
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -107,7 +131,7 @@ class RechnungHandyScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.print, size: 40, color: Colors.green),
-                  tooltip: "توليد كود وطباعة",
+                  tooltip: "خيارات الفاتورة",
                 ),
               ],
             ),

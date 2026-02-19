@@ -8,7 +8,6 @@ Future<pw.Widget> buildPdfContent(
   final ByteData bytes = await rootBundle.load('assets/images/pdf.png');
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
-  final double netAmount = double.tryParse(data['price'].toString()) ?? 0;
   final NumberFormat currencyFormat = NumberFormat('#,##0.00', 'de_DE');
 
   // Helper to normalize defects list
@@ -22,6 +21,14 @@ Future<pw.Widget> buildPdfContent(
         'price': data['price'] ?? 0,
         'quantity': data['quantity'] ?? 1,
       });
+  }
+
+  // Calculate total amount from defects
+  double totalAmount = 0;
+  for (var defect in defects) {
+    final double p = double.tryParse(defect['price'].toString()) ?? 0;
+    final int q = int.tryParse(defect['quantity'].toString()) ?? 1;
+    totalAmount += (p * q);
   }
 
   return pw.Column(
@@ -55,7 +62,7 @@ Future<pw.Widget> buildPdfContent(
             bool isLast = (index == defects.length - 1);
             
             final double itemPrice = double.tryParse(defect['price'].toString()) ?? 0;
-            final double itemNet = double.parse((itemPrice / 1.19).toStringAsFixed(2));
+            // Removed tax calculation. Showing full price.
             final String itemIssue = defect['issue'] ?? '';
             final String itemQty = (defect['quantity'] ?? 1).toString();
 
@@ -81,7 +88,7 @@ Future<pw.Widget> buildPdfContent(
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.only(bottom: 5),
-                  child: pw.Text('${currencyFormat.format(itemNet)} ',
+                  child: pw.Text('${currencyFormat.format(itemPrice)} ',
                       style: pw.TextStyle(
                           fontSize: 14, fontWeight: pw.FontWeight.bold),
                       textAlign: pw.TextAlign.right),
@@ -94,7 +101,7 @@ Future<pw.Widget> buildPdfContent(
 
       pw.SizedBox(height: 5),
 
-      // Netto, MwSt, Brutto
+      // Total Amount
       pw.Padding(
         padding: const pw.EdgeInsets.only(left: 80),
         child: pw.Column(
@@ -103,10 +110,10 @@ Future<pw.Widget> buildPdfContent(
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Bruttobetrag EUR ',
+                pw.Text('Gesamtbetrag EUR ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-                pw.Text('${currencyFormat.format(netAmount)} ',
+                pw.Text('${currencyFormat.format(totalAmount)} ',
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
               ],

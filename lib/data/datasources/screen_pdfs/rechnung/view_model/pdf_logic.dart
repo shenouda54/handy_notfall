@@ -62,7 +62,18 @@ Future<File?> generatePdf(
     if (await file.exists()) {
       if (sendEmail) {
         final Email email = Email(
-          body: 'Hier ist Ihre Rechnung Nr. $rechnungNr',
+          body: '''Sehr geehrte Damen und Herren,
+
+anbei erhalten Sie Ihre Rechnung.
+Bei Rückfragen stehen wir Ihnen gerne zur Verfügung.
+
+Mit freundlichen Grüßen
+Bakhit
+HandyNotfall
+
+Breitscheider Straße 2
+53547 Roßbach
+Tel.: 0175 4111112''',
           subject: 'Rechnung $rechnungNr',
           recipients: userEmail != null ? [userEmail] : [],
           attachmentPaths: [file.path],

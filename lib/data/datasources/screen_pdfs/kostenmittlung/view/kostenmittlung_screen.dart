@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:handy_notfall/core/widgets/print_dialog_helper.dart';
 
 import 'package:handy_notfall/data/datasources/screen_pdfs/kostenmittlung/view_model/pdf_logic.dart';
 
@@ -46,10 +48,35 @@ class KostenmittlungScreen extends StatelessWidget {
           return Center(
             child: ElevatedButton(
               onPressed: () async {
-                await generatePdf(data, context, auftragNr);
+                // Show dialog to choose action
+                final action = await PrintDialogHelper.showPrintOptionsDialog(context);
+
+                if (action == null) return;
+
+                // Determine Recipient
+                String? targetEmail;
+                bool sendEmail = false;
+
+                if (action == 'email_me') {
+                  targetEmail = FirebaseAuth.instance.currentUser?.email;
+                  sendEmail = true;
+                } else if (action == 'email_customer') {
+                  targetEmail = data['emailAddress'];
+                  sendEmail = true;
+                }
+
+                await generatePdf(
+                  data, 
+                  context, 
+                  auftragNr,
+                  sendEmail: sendEmail,
+                  userEmail: targetEmail,
+                );
               },
-              child: const Text("📄 Download Kostenmittlung PDF"),
+
+              child: const Text("📄 خيارات Kostenmittlung"),
             ),
+
           );
         },
       ),

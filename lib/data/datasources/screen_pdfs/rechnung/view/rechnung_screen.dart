@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:handy_notfall/core/widgets/error_widget.dart';
+import 'package:handy_notfall/core/widgets/print_dialog_helper.dart';
 
 import 'package:handy_notfall/data/datasources/screen_pdfs/rechnung/view_model/pdf_logic.dart';
 import 'package:handy_notfall/data/datasources/print_pdf/rechnung_number/view_model/rechnung_numbering_logic.dart';
@@ -86,54 +87,7 @@ class RechnungScreen extends StatelessWidget {
                 IconButton(
                   onPressed: () async {
                     // Show dialog to choose action
-                    final action = await showDialog<String>(
-                      context: context,
-                      builder: (ctx) => SimpleDialog(
-                        title: const Text("اختر إجراء"),
-                        children: [
-                          SimpleDialogOption(
-                            onPressed: () => Navigator.pop(ctx, 'print'),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.print, color: Colors.blue),
-                                  SizedBox(width: 12),
-                                  Text("معاينة / طباعة", style: TextStyle(fontSize: 16)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          
-                          SimpleDialogOption(
-                            onPressed: () => Navigator.pop(ctx, 'email_me'),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.person, color: Colors.blueGrey),
-                                  SizedBox(width: 12),
-                                  Text("إرسال إلى إيميلي", style: TextStyle(fontSize: 16)),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SimpleDialogOption(
-                            onPressed: () => Navigator.pop(ctx, 'email_customer'),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.alternate_email, color: Colors.orange),
-                                  SizedBox(width: 12),
-                                  Text("إرسال إلى إيميل العميل", style: TextStyle(fontSize: 16)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                    final action = await PrintDialogHelper.showPrintOptionsDialog(context);
 
                     if (action == null) return;
 
@@ -142,25 +96,7 @@ class RechnungScreen extends StatelessWidget {
                     if (action == 'email_me') actionText = "وإرسال (لي)";
                     if (action == 'email_customer') actionText = "وإرسال (للعميل)";
 
-                    // Confirm generation if needed
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text("تأكيد"),
-                        content: Text(
-                            "هل تريد توليد $actionText كود Rechnung لهذا الطلب؟"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(false),
-                            child: const Text("لا"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(true),
-                            child: const Text("نعم"),
-                          ),
-                        ],
-                      ),
-                    );
+                    final confirm = await PrintDialogHelper.showConfirmationDialog(context, actionText, "Rechnung");
 
                     if (confirm != true) return;
 
@@ -186,7 +122,7 @@ class RechnungScreen extends StatelessWidget {
                           targetEmail = FirebaseAuth.instance.currentUser?.email;
                           sendEmail = true;
                         } else if (action == 'email_customer') {
-                          targetEmail = data['emailAddress']; // Ensure this matches Firestore key
+                          targetEmail = data['emailAddress'];
                           sendEmail = true;
                         }
 

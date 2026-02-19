@@ -4,6 +4,7 @@ import '../view/pdf_ui_verkaufe.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<bool> requestStoragePermission() async {
@@ -19,7 +20,8 @@ Future<bool> requestStoragePermission() async {
 }
 
 Future<void> generatePdf(
-    Map<String, dynamic> data, BuildContext context, String rechnungNr) async {
+    Map<String, dynamic> data, BuildContext context, String rechnungNr,
+    {bool sendEmail = false, String? userEmail}) async {
   try {
     final pdf = pw.Document();
     final pdfPageContent = await buildPdfContent(data, rechnungNr);
@@ -49,10 +51,50 @@ Future<void> generatePdf(
     await file.writeAsBytes(await pdf.save());
 
     if (await file.exists()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("✅ PDF gespeichert als $fileName")),
-      );
-      await OpenFile.open(file.path);
+      if (sendEmail) {
+        final Email email = Email(
+          body: '''Sehr geehrte Damen und Herren,
+
+anbei erhalten Sie Ihre Rechnung.
+Bei Rückfragen stehen wir Ihnen gerne zur Verfügung.
+
+Mit freundlichen Grüßen
+Bakhit
+HandyNotfall
+
+Breitscheider Straße 2
+53547 Roßbach
+Tel.: 0175 4111112''',
+          subject: 'Rechnung Verkaufe $rechnungNr',
+          recipients: userEmail != null ? [userEmail] : [],
+          attachmentPaths: [file.path],
+          isHTML: false,
+        );
+
+        try {
+          await FlutterEmailSender.send(email);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("✅ Email-App geöffnet")),
+          );
+        } catch (e) {
+          String errorMessage = "❌ Fehler beim Senden der E-Mail";
+          if (e.toString().contains("not_available") ||
+              e.toString().contains("No email clients found")) {
+            errorMessage = "❌ Keine E-Mail-App gefunden! Bitte installieren Sie eine Mail-App.";
+          } else {
+            errorMessage = "$errorMessage: $e";
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("✅ PDF gespeichert als $fileName")),
+        );
+        await OpenFile.open(file.path);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("❌ Fehler beim Speichern")),
