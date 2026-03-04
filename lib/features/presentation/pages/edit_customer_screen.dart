@@ -164,7 +164,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
       List<Map<String, dynamic>> defectsData = defectCards.map((card) {
         return {
           'issue': card.selectedIssues.join(', '),
-          'price': int.tryParse(card.priceController.text.trim()) ?? 0,
+          'price': double.tryParse(card.priceController.text.trim()) ?? 0,
           'quantity': int.tryParse(card.quantityController.text.trim()) ?? 1,
         };
       }).toList();

@@ -10,7 +10,7 @@ class SaveCustomerDataUseCase {
     
     // For backward compatibility, use first defect for legacy fields
     String firstIssue = 'No Issues';
-    int firstPrice = 0;
+    double firstPrice = 0;
     int firstQuantity = 1;
     
     if (entity.defects.isNotEmpty) {

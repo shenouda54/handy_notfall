@@ -136,7 +136,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 
                 _buildSectionTitle('Auftragsdetails', Icons.assignment, theme),
                 _buildInfoCard([
-                  _buildDetailRow(Icons.euro, 'Preis', "${data['price']} €", theme),
+                  _buildDetailRow(Icons.euro, 'Preis', "${(data['price'] is num ? (data['price'] as num).toDouble() : double.tryParse(data['price'].toString()) ?? 0).toStringAsFixed(2)} €", theme),
                   _buildDetailRow(Icons.calendar_today, 'Startdatum', DateFormat('dd.MM.yyyy').format((data['startDate'] as Timestamp).toDate()), theme),
                   _buildDetailRow(Icons.event, 'Enddatum', DateFormat('dd.MM.yyyy').format((data['endDate'] as Timestamp).toDate()), theme),
                 ], theme),

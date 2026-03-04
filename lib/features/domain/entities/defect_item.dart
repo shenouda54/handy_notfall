@@ -1,6 +1,6 @@
 class DefectItem {
   final String issue;
-  final int price;
+  final double price;
   final int quantity;
 
   DefectItem({
@@ -20,7 +20,7 @@ class DefectItem {
   factory DefectItem.fromMap(Map<String, dynamic> map) {
     return DefectItem(
       issue: map['issue'] ?? '',
-      price: map['price'] ?? 0,
+      price: (map['price'] ?? 0).toDouble(),
       quantity: map['quantity'] ?? 1,
     );
   }

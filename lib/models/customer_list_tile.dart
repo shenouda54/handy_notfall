@@ -45,7 +45,7 @@ class CustomerListTile extends StatelessWidget {
             "Problem: ${customer["issue"]}\n"
             "Handynummer: ${customer["phone"]}\n"
             "PIN code: ${customer["pinCode"]}\n"
-            "Preis: ${customer["price"]}€",
+            "Preis: ${(customer["price"] is num ? (customer["price"] as num).toDouble() : double.tryParse(customer["price"].toString()) ?? 0).toStringAsFixed(2)}€",
           ),
           trailing: Wrap(
             spacing: 8,

@@ -17,6 +17,8 @@ class PdfWidgets {
     bool showImei = false,
     bool showPinCode = false,
     bool showAuftragNrInHeader = true,
+    bool showKundennummer = true,
+    bool showTitle = true,
     DateTime? date,
   }) {
     return pw.Row(
@@ -48,10 +50,11 @@ class PdfWidgets {
                     "Auftrag Nr: ${data['auftragNr'] ?? ''}",
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
-              pw.Text(
-                  "Kundennummer: ${data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر'}",
-                  style: pw.TextStyle(
-                      fontSize: 12, fontWeight: pw.FontWeight.bold)),
+              if (showKundennummer)
+                pw.Text(
+                    "Kundennummer: ${data.containsKey('kundennummer') ? data['kundennummer'].toString() : 'غير متوفر'}",
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
               pw.Text(
                 'Datum: ${DateFormat('dd.MM.yyyy').format(date ?? (data['startDate'] as Timestamp).toDate())}',
                 style: pw.TextStyle(
@@ -87,9 +90,10 @@ class PdfWidgets {
                     style: pw.TextStyle(
                         fontSize: 12, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 20),
-              pw.Text('$title: $titleNumber',
-                  style: pw.TextStyle(
-                      fontSize: 20, fontWeight: pw.FontWeight.bold)),
+              if (showTitle)
+                pw.Text('$title: $titleNumber',
+                    style: pw.TextStyle(
+                        fontSize: 20, fontWeight: pw.FontWeight.bold)),
             ],
           ),
         ),

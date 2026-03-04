@@ -12,7 +12,7 @@ class CustomerModel {
   String issue;
   String serialNumber;
   String pinCode;
-  int price;
+  double price;
   int quantity;
   Timestamp startDate;
   Timestamp endDate;
@@ -76,7 +76,7 @@ class CustomerModel {
       issue: json['issue'] ?? '',
       serialNumber: json['serialNumber'],
       pinCode: json['pinCode'],
-      price: json['price'] ?? 0,
+      price: (json['price'] ?? 0).toDouble(),
       quantity: json['quantity'] ?? 1,
       defects: defectsList,
       userEmail: json['userEmail'] ?? '',

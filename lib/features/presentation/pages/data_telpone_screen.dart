@@ -219,7 +219,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                       List<DefectItem> defects = defectCards.map((card) {
                         return DefectItem(
                           issue: card.selectedIssues.join(', '),
-                          price: int.tryParse(card.priceController.text.trim()) ?? 0,
+                          price: double.tryParse(card.priceController.text.trim()) ?? 0,
                           quantity: int.tryParse(card.quantityController.text.trim()) ?? 1,
                         );
                       }).toList();
@@ -359,7 +359,7 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                   child: CustomInputField(
                     controller: card.priceController,
                     label: 'Preis *',
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ),
                 ),
                 const SizedBox(width: 12),

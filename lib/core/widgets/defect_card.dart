@@ -86,7 +86,7 @@ class _DefectCardState extends State<DefectCard> {
                   child: CustomInputField(
                     controller: widget.cardState.priceController,
                     label: 'Preis *',
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     enabled: !widget.isLocked,
                   ),
                 ),
