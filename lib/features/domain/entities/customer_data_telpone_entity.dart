@@ -16,6 +16,7 @@ class CustomerDataEntity {
   final Timestamp endDate;
   final bool isDone;
   final String userEmail;
+  final String? signatureBase64;
 
   CustomerDataEntity({
     required this.customerFirstName,
@@ -32,5 +33,6 @@ class CustomerDataEntity {
     required this.endDate,
     required this.isDone,
     required this.userEmail,
+    this.signatureBase64,
   });
 }

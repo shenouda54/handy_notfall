@@ -1,10 +1,13 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../../shared/pdf_widgets.dart';
 
 Future<pw.Widget> buildPdfContent(
-    Map<String, dynamic> data, String auftragNr) async {
+    Map<String, dynamic> data, String auftragNr, {Uint8List? signatureBytes}) async {
+  debugPrint('📄 buildPdfContent: signatureBytes = ${signatureBytes != null ? "${signatureBytes.length} bytes" : "null"}');
   final ByteData bytes = await rootBundle.load('assets/images/pdf.png');
   final Uint8List logoBytes = bytes.buffer.asUint8List();
 
@@ -123,12 +126,42 @@ Future<pw.Widget> buildPdfContent(
         ),
       ),
 
-      pw.SizedBox(height: 50),
+      pw.SizedBox(height: 30),
 
       PdfWidgets.buildClosingText(),
-      
+
+      pw.SizedBox(height: 20),
+
+      // Customer Signature Section
+      pw.Align(
+        alignment: pw.Alignment.centerLeft,
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            if (signatureBytes != null) ...[
+              pw.Image(
+                pw.MemoryImage(signatureBytes),
+                width: 200,
+                height: 60,
+                fit: pw.BoxFit.contain,
+              ),
+            ] else ...[
+              pw.SizedBox(height: 60), // Maintain spacing if no signature
+            ],
+            pw.SizedBox(
+              width: 150,
+              child: pw.Divider(thickness: 1),
+            ),
+            pw.Text('Unterschrift des Kunden',
+                style: pw.TextStyle(
+                    fontSize: 8, fontWeight: pw.FontWeight.bold)),
+          ],
+        ),
+      ),
+
       pw.Spacer(),
       PdfWidgets.buildFooter(),
     ],
   );
 }
+

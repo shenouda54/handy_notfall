@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/models/customer_details_screen.dart';
 import 'package:handy_notfall/features/presentation/pages/edit_customer_screen.dart';
@@ -29,7 +31,25 @@ class CustomerListTile extends StatelessWidget {
             return;
           }
           final data = doc.data()!;
-          await generatePdf(data, context, data['auftragNr'] ?? '');
+
+          // 1. Decode the signature, if it exists
+          Uint8List? signatureBytes;
+          if (data.containsKey('signatureBase64') && data['signatureBase64'] != null) {
+            try {
+              signatureBytes = base64Decode(data['signatureBase64']);
+              debugPrint("Signature decoded successfully from Firebase in CustomerListTile");
+            } catch (e) {
+              debugPrint("Error decoding signature: $e");
+            }
+          }
+
+          // 2. Generate PDF with the loaded signature
+          await generatePdf(
+            data, 
+            context, 
+            data['auftragNr']?.toString() ?? '',
+            signatureBytes: signatureBytes,
+          );
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('❌ خطأ أثناء تحميل الفاتورة: $e')),

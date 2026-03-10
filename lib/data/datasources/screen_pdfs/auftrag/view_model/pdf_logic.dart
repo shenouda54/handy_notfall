@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -21,10 +22,10 @@ Future<bool> requestStoragePermission() async {
 
 Future<void> generatePdf(
     Map<String, dynamic> data, BuildContext context, String auftragNr,
-    {bool sendEmail = false, String? userEmail}) async {
+    {bool sendEmail = false, String? userEmail, Uint8List? signatureBytes}) async {
   try {
     final pdf = pw.Document();
-    final pdfPageContent = await buildPdfContent(data, auftragNr);
+    final pdfPageContent = await buildPdfContent(data, auftragNr, signatureBytes: signatureBytes);
 
     pdf.addPage(
       pw.Page(

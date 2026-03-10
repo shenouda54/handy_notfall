@@ -47,7 +47,6 @@ Future<pw.Widget> buildPdfContent(
         logoBytes: logoBytes,
         date: data['endDate'] != null ? (data['endDate'] as Timestamp).toDate() : null,
         showAuftragNrInHeader: false,
-        showKundennummer: false,
       ),
 
       PdfWidgets.buildTableHeader(),

@@ -48,7 +48,6 @@ Future<pw.Widget> buildPdfContent(
         titleNumber: rechnungNr,
         logoBytes: logoBytes,
         showAuftragNrInHeader: false,
-        showKundennummer: false,
       ),
 
       PdfWidgets.buildTableHeader(),

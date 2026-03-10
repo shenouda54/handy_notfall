@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:handy_notfall/core/widgets/date_picker_field.dart';
 import 'package:handy_notfall/core/widgets/device_type_selection.dart';
 import 'package:handy_notfall/core/widgets/issue_selection.dart';
 import 'package:handy_notfall/features/domain/usecases/save_customer_data_usecase.dart';
+import 'package:handy_notfall/features/presentation/pages/signature_screen.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/customer_data_telpone_entity.dart';
 import 'package:handy_notfall/service/issue_storage_service.dart';
@@ -224,6 +227,40 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                         );
                       }).toList();
 
+                      // Prepare defects list for signature screen
+                      final defectsForSignature = defects.map((d) => {
+                        'issue': d.issue,
+                        'price': d.price,
+                        'quantity': d.quantity,
+                      }).toList();
+
+                      // 1. Navigate to Signature Screen to get the signature FIRST
+                      final Uint8List? signatureBytes = await Navigator.push<Uint8List?>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignatureScreen(
+                            customerName: widget.firstName.trim(),
+                            address: widget.address.trim(),
+                            city: widget.city.trim(),
+                            phoneNumber: widget.phoneNumber.trim(),
+                            emailAddress: widget.emailAddress.trim(),
+                            deviceType: selectedDeviceTypes.join(', '),
+                            deviceModel: modelController.text.trim(),
+                            serialNumber: serialNumberController.text.trim(),
+                            defects: defectsForSignature,
+                            startDate: startDateController.text.trim(),
+                            endDate: endDateController.text.trim(),
+                          ),
+                        ),
+                      );
+
+                      // 2. Encode signature to Base64 (if it exists)
+                      String? signatureBase64;
+                      if (signatureBytes != null) {
+                        signatureBase64 = base64Encode(signatureBytes);
+                      }
+
+                      // 3. Create Entity WITH the signatureBase64
                       final entity = CustomerDataEntity(
                         customerFirstName: widget.firstName.trim(),
                         address: widget.address.trim(),
@@ -243,14 +280,18 @@ class _DataTelponeScreenState extends State<DataTelponeScreen> {
                             : Timestamp.now(),
                         isDone: false,
                         userEmail: userEmail,
+                        signatureBase64: signatureBase64, // Pass signature string to entity
                       );
 
+                      // 4. Save to Firebase
                       await SaveCustomerDataUseCase().execute(entity);
 
-                      // طباعة وفتح PDF للـ Auftrag بالبيانات الحالية
+                      // 5. Generate and print Auftrag PDF (with signature)
+                      debugPrint('📝 Signature bytes: ${signatureBytes != null ? "${signatureBytes.length} bytes" : "null (no signature)"}');
                       await AuftragPdfService.generateAndPrintAuftrag(
                         context: context,
                         entity: entity,
+                        signatureBytes: signatureBytes,
                       );
 
                       ScaffoldMessenger.of(context).showSnackBar(

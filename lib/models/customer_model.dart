@@ -23,6 +23,7 @@ class CustomerModel {
   String? auftragNr; // رقم الطلب
   String? rechnungCode; // كود الفاتورة/الفواتير
   List<Map<String, dynamic>> defects; // New field for multiple defects
+  String? signatureBase64; // Signature image as Base64 string
 
   CustomerModel({
     this.id = '',
@@ -44,6 +45,7 @@ class CustomerModel {
     this.kundennummer,
     this.auftragNr,
     this.rechnungCode,
+    this.signatureBase64,
     Timestamp? startDate,
     Timestamp? endDate,
     this.isDone = false,
@@ -87,6 +89,7 @@ class CustomerModel {
       kundennummer: json['kundennummer'],
       auftragNr: json['auftragNr'],
       rechnungCode: json['rechnungCode'],
+      signatureBase64: json['signatureBase64'],
     );
   }
 
@@ -114,6 +117,7 @@ class CustomerModel {
       "kundennummer": kundennummer,
       "auftragNr": auftragNr,
       "rechnungCode": rechnungCode,
+      "signatureBase64": signatureBase64,
     };
   }
 }

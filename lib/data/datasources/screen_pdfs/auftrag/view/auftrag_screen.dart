@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:handy_notfall/core/widgets/error_widget.dart';
@@ -70,6 +72,17 @@ class AuftragScreen extends StatelessWidget {
 
                 if (action == null) return;
 
+                // 1. Decode the signature, if it exists
+                Uint8List? signatureBytes;
+                if (data.containsKey('signatureBase64') && data['signatureBase64'] != null) {
+                  try {
+                    signatureBytes = base64Decode(data['signatureBase64']);
+                    debugPrint("Signature decoded successfully from Firebase");
+                  } catch (e) {
+                    debugPrint("Error decoding signature: $e");
+                  }
+                }
+
                 // Determine Recipient
                 String? targetEmail;
                 bool sendEmail = false;
@@ -88,6 +101,7 @@ class AuftragScreen extends StatelessWidget {
                   auftragNr,
                   sendEmail: sendEmail,
                   userEmail: targetEmail,
+                  signatureBytes: signatureBytes, // Pass the decoded signature
                 );
               },
               child: const Text("📄 خيارات Auftrag"),

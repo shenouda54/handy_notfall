@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:handy_notfall/features/domain/entities/customer_data_telpone_entity.dart';
 
@@ -13,6 +14,7 @@ class AuftragPdfService {
   static Future<void> generateAndPrintAuftrag({
     required BuildContext context,
     required CustomerDataEntity entity,
+    Uint8List? signatureBytes,
   }) async {
     try {
       await Future.delayed(const Duration(milliseconds: 500));
@@ -59,7 +61,8 @@ class AuftragPdfService {
         'customerCode': null,
       };
 
-      await generatePdf(pdfData, context, auftragNr);
+      debugPrint('📄 AuftragPdfService: signatureBytes = ${signatureBytes != null ? "${signatureBytes!.length} bytes" : "null"}');
+      await generatePdf(pdfData, context, auftragNr, signatureBytes: signatureBytes);
 
       await Future.delayed(const Duration(milliseconds: 300));
     } catch (e) {

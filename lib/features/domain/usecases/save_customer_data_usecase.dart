@@ -37,6 +37,7 @@ class SaveCustomerDataUseCase {
       endDate: entity.endDate,
       isDone: entity.isDone, 
       userEmail: entity.userEmail,
+      signatureBase64: entity.signatureBase64,
     );
 
     await CustomerService.saveCustomer(model);
