@@ -79,7 +79,7 @@ class RechnungScreen extends StatelessWidget {
                     await generatePdf(data, context, code);
                   },
                   icon: const Icon(Icons.remove_red_eye, size: 40, color: Colors.blue),
-                  tooltip: "معاينة / طباعة مباشرة",
+                  tooltip: "Drucken",
                 ),
                 const SizedBox(width: 40),
 

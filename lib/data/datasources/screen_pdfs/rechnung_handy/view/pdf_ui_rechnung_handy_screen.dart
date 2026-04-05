@@ -118,7 +118,7 @@ Future<pw.Widget> buildPdfContent(
           ),
           pw.SizedBox(height: 30),
           pw.Text(
-              'Gebrauchtgegenstände / Sonderregelung, Differenzbesteuerung nach §25a UStG, MwSt. nichtausweisbar',
+              'Gebrauchtware / Sonderreglung, Differenzbesteuerung nach §25a UStG, MwSt. nichtausweisbar',
               style:
                   pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
         ],

@@ -75,14 +75,15 @@ class PdfWidgets {
                 ],
               ),
               pw.Row(
+
                 children: [
-                  pw.Text('IMEL: ${data['serialNumber']}',
+                  pw.Text('IMEI: ${data['serialNumber']}',
                       style: pw.TextStyle(
                           fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 ]
               ),
               // if (showImei)
-              //   pw.Text('IMEL: ${data['serialNumber']}',
+              //   pw.Text('IMEI: ${data['serialNumber']}',
               //       style: pw.TextStyle(
               //           fontSize: 12, fontWeight: pw.FontWeight.bold)),
               if (showPinCode)

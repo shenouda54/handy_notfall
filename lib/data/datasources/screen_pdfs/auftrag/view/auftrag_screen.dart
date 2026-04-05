@@ -104,7 +104,7 @@ class AuftragScreen extends StatelessWidget {
                   signatureBytes: signatureBytes, // Pass the decoded signature
                 );
               },
-              child: const Text("📄 خيارات Auftrag"),
+              child: const Text("Auftrag 📄"),
             ),
           );
         },

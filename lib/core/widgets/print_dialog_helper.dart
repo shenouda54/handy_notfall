@@ -5,7 +5,6 @@ class PrintDialogHelper {
     return showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text("اختر إجراء"),
         children: [
           SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, 'print'),
@@ -15,7 +14,7 @@ class PrintDialogHelper {
                 children: [
                   Icon(Icons.print, color: Colors.blue),
                   SizedBox(width: 12),
-                  Text("معاينة / طباعة", style: TextStyle(fontSize: 16)),
+                  Text("Drucken", style: TextStyle(fontSize: 16)),
                 ],
               ),
             ),
@@ -28,9 +27,10 @@ class PrintDialogHelper {
                 children: [
                   Icon(Icons.person, color: Colors.blueGrey),
                   SizedBox(width: 12),
-                  Text("إرسال إلى إيميلي", style: TextStyle(fontSize: 16)),
+                  Text("An meine E-Mail", style: TextStyle(fontSize: 16)),
                 ],
               ),
+
             ),
           ),
           SimpleDialogOption(
@@ -41,7 +41,7 @@ class PrintDialogHelper {
                 children: [
                   Icon(Icons.alternate_email, color: Colors.orange),
                   SizedBox(width: 12),
-                  Text("إرسال إلى إيميل العميل", style: TextStyle(fontSize: 16)),
+                  Text("An Kunden-E-Mail", style: TextStyle(fontSize: 16)),
                 ],
               ),
             ),
