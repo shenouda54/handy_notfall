@@ -55,17 +55,17 @@ class PrintDialogHelper {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("تأكيد"),
-        content: Text(
-            "هل تريد توليد $actionText كود $type لهذا الطلب؟"),
+        title: const Text("Bestätigen"),
+        // content: Text(
+        //     "هل تريد توليد $actionText كود $type لهذا الطلب؟"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text("لا"),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text("Ja"),
           ),
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text("نعم"),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text("Nein"),
           ),
         ],
       ),
